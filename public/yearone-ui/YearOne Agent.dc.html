@@ -354,7 +354,15 @@ class Component extends DCLogic {
     activeId: null,
     clarifyDate: "",
     commitPhase: "",
-    commitPct: "0%"
+    commitPct: "0%",
+
+    firms: [],
+    selectedFirmId: "FIRMA-0004",
+    analysis: null,
+    scenarioAnalysis: null,
+    scoreSummary: null,
+    apiStatus: "Accuracy",
+    apiError: null
   };
 
   // ───────── data ─────────
@@ -469,11 +477,115 @@ class Component extends DCLogic {
   }
 
   // ───────── helpers ─────────
+  componentDidMount(){
+    this.loadBackendDefaults();
+  }
+  async apiJson(url, options){
+    const res = await fetch(url, Object.assign({
+      headers: {"Content-Type":"application/json"}
+    }, options || {}));
+    if (!res.ok){
+      let msg = url + " vrátilo " + res.status;
+      try { const body = await res.json(); if (body && body.message) msg = body.message; } catch(e){}
+      throw new Error(msg);
+    }
+    return res.json();
+  }
+  async loadBackendDefaults(){
+    try {
+      const out = await Promise.all([
+        this.apiJson("/api/firms"),
+        this.apiJson("/api/score")
+      ]);
+      const firms = out[0].firms || [];
+      const scoreSummary = out[1].score || null;
+      const firm = firms.find(f => f.id === "FIRMA-0004") || firms[0];
+      if (!firm) return;
+      this.setState({
+        firms,
+        scoreSummary,
+        selectedFirmId: firm.id,
+        answers: this.answersFromFirm(firm),
+        labels: this.labelsFromFirm(firm),
+        apiStatus: "Accuracy",
+        apiError: null
+      });
+    } catch(e) {
+      this.setState({
+        apiStatus: "Accuracy",
+        apiError: e && e.message ? e.message : "Backend se nepodařilo načíst."
+      });
+    }
+  }
+  answersFromFirm(firm){
+    const owners = (firm.spolecnici || []).some(p => p.typ === "PO")
+      ? "po"
+      : ((firm.spolecnici || []).length > 1 ? "multi" : "me");
+    return {
+      predmet: firm.predmet,
+      obec: (firm.sidlo && (firm.sidlo.obec || firm.sidlo.adresa)) || "Olomouc",
+      obrat: firm.predpokladany_obrat_rok,
+      zamestnanci: firm.plan_zamestnancu,
+      provozovna: !!firm.provozovna,
+      owners
+    };
+  }
+  labelsFromFirm(firm){
+    const a = this.answersFromFirm(firm);
+    return {
+      predmet: this.pretty(a.predmet),
+      obec: a.obec,
+      obrat: this.money(a.obrat),
+      zamestnanci: a.zamestnanci === 0 ? "Bez zaměstnanců" : (a.zamestnanci + " zaměstnanců"),
+      provozovna: a.provozovna ? "S provozovnou" : "Bez provozovny",
+      owners: a.owners === "po" ? "Zapojí se i firma" : (a.owners === "multi" ? "Více fyzických osob" : "Jen já")
+    };
+  }
+  async fetchAnalysis(firmId){
+    this.setState({apiStatus:"Cooking", apiError:null});
+    try {
+      const analysis = await this.apiJson("/api/analyze", {
+        method:"POST",
+        body:JSON.stringify({firmId})
+      });
+      this.setState({
+        analysis,
+        scenarioAnalysis:null,
+        selectedFirmId: firmId,
+        apiStatus:"Accuracy",
+        apiError:null
+      });
+      return analysis;
+    } catch(e) {
+      this.setState({
+        apiStatus:"Accuracy",
+        apiError:e && e.message ? e.message : "Analýza selhala."
+      });
+      throw e;
+    }
+  }
+  async fetchScenario(ev){
+    const firmId = this.state.selectedFirmId || "FIRMA-0004";
+    this.setState({apiStatus:"Cooking", apiError:null});
+    const analysis = await this.apiJson("/api/simulate", {
+      method:"POST",
+      body:JSON.stringify({firmId, event:ev})
+    });
+    this.setState({
+      scenarioAnalysis:analysis,
+      apiStatus:"Accuracy",
+      apiError:null
+    });
+    return analysis;
+  }
   money(n){ return new Intl.NumberFormat("cs-CZ").format(Math.round(n)) + " Kč"; }
   pretty(p){ return this.PRETTY[p] || p; }
   tradeId(p){ return this.TRADEID[this.ZIV[p] || "volna"]; }
 
   firm(){
+    if (this.state.analysis && this.state.analysis.firm) return this.state.analysis.firm;
+    const selected = (this.state.firms || []).find(f => f.id === this.state.selectedFirmId);
+    if (selected) return selected;
     const a = this.state.answers;
     const ownersMap = {
       me:[{typ:"FO",statni_prislusnost:"CZ"}],
@@ -663,7 +775,24 @@ class Component extends DCLogic {
   onCustomKey(e){ if (e.key === "Enter"){ e.preventDefault(); this.confirmCustom(); } }
   back(){ if (this.state.step > 0) this.setState({step:this.state.step - 1, customOpen:false}); }
   goStep(i){ this.setState({step:i, customOpen:false}); }
-  goHome(){ this._clear(); this.setState({screen:"canvas", step:0, answers:{}, labels:{}, customOpen:false, customVal:"", scenario:null, doneSteps:{}, showAudit:false}); }
+  goHome(){
+    this._clear();
+    const firm = (this.state.firms || []).find(f => f.id === this.state.selectedFirmId);
+    this.setState({
+      screen:"canvas",
+      step:0,
+      answers: firm ? this.answersFromFirm(firm) : {},
+      labels: firm ? this.labelsFromFirm(firm) : {},
+      customOpen:false,
+      customVal:"",
+      scenario:null,
+      doneSteps:{},
+      showAudit:false,
+      analysis:null,
+      scenarioAnalysis:null,
+      thread:[]
+    });
+  }
 
   build(){
     this._clear();
@@ -671,12 +800,15 @@ class Component extends DCLogic {
     this.setState({screen:"running", genIndex:0});
     const speed = {"klidné":620,"svižné":380,"okamžité":110}[this.props.pipelineSpeed || "svižné"] || 380;
     const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced){ this.setState({screen:"plan"}); return; }
+    const firmId = this.state.selectedFirmId || "FIRMA-0004";
+    const analysisPromise = this.fetchAnalysis(firmId).catch(() => null);
+    const finish = () => analysisPromise.finally(() => this.setState({screen:"plan"}));
+    if (reduced){ finish(); return; }
     let i = 0;
     const tick = () => {
       i++; this.setState({genIndex:i});
       if (i < phases - 1) this._t = setTimeout(tick, speed);
-      else this._t = setTimeout(() => this.setState({screen:"plan"}), speed + 250);
+      else this._t = setTimeout(() => finish(), speed + 250);
     };
     this._t = setTimeout(tick, speed);
   }
@@ -785,16 +917,27 @@ class Component extends DCLogic {
     this.setState(s => ({
       activeId:null,
       thread: (s.thread||[]).concat([{id:this._nid(), role:"user", text:"Od "+dstr}]),
-      thinking:true, thinkingLabel:"Počítám dopad na plán…"
+      thinking:true, thinkingLabel:"Cooking…"
     }), () => this.scrollBottom());
     this._clearCt();
     this._ct = setTimeout(() => this._postAnswer(ev), 1000);
   }
-  _postAnswer(ev){
+  async _postAnswer(ev){
     const base = this.parseDate(this.state.clarifyDate) || this.today();
-    const dls = this.deadlinesFor(ev, base);
-    const before = this.evaluate(this.firm());
-    const after = this.evaluate(this.applyScenario(this.firm(), ev));
+    let apiAnalysis = null;
+    try {
+      apiAnalysis = await this.fetchScenario(ev);
+    } catch(e) {
+      this.setState({
+        apiStatus:"Accuracy",
+        apiError:e && e.message ? e.message : "Simulace selhala."
+      });
+    }
+    const dls = apiAnalysis && apiAnalysis.scenario && apiAnalysis.scenario.delta && apiAnalysis.scenario.delta.timelineImpact.length
+      ? apiAnalysis.scenario.delta.timelineImpact.map(x => ({label:x, meta:"/api/simulate · " + ((apiAnalysis.model && apiAnalysis.model.mode) || "local")}))
+      : this.deadlinesFor(ev, base);
+    const before = this.state.analysis ? this.state.analysis.obligations.map(x => x.id) : this.evaluate(this.firm());
+    const after = apiAnalysis ? apiAnalysis.obligations.map(x => x.id) : this.evaluate(this.applyScenario(this.firm(), ev));
     const as = new Set(after);
     const removed = before.filter(id => !as.has(id));
     const n = dls.length;
@@ -824,7 +967,8 @@ class Component extends DCLogic {
     this._ct = setTimeout(step, 560);
   }
   _finishCommit(cid, ev){
-    const applied = this.applyScenario(this.firm(), ev);
+    const apiAnalysis = this.state.scenarioAnalysis;
+    const applied = apiAnalysis && apiAnalysis.firm ? apiAnalysis.firm : this.applyScenario(this.firm(), ev);
     const a = Object.assign({}, this.state.answers);
     const labels = Object.assign({}, this.state.labels);
     a.predmet = applied.predmet; a.obrat = applied.predpokladany_obrat_rok; a.zamestnanci = applied.plan_zamestnancu;
@@ -833,7 +977,7 @@ class Component extends DCLogic {
     labels.zamestnanci = applied.plan_zamestnancu === 0 ? "Bez zaměstnanců" : (applied.plan_zamestnancu + " zaměstnanců");
     labels.provozovna = applied.provozovna ? "S provozovnou" : "Bez provozovny";
     this.setState(s => ({
-      answers:a, labels, doneSteps:{},
+      answers:a, labels, doneSteps:{}, analysis:apiAnalysis || s.analysis, scenarioAnalysis:null,
       thread: (s.thread||[]).filter(m => m.id !== cid).concat([{id:this._nid(), role:"agent", kind:"done", text:"Hotovo — změna je v plánu a termíny v timeline jsou aktualizované."}])
     }), () => { window.scrollTo({top:0, behavior:"smooth"}); this.scrollBottom(); });
   }
@@ -917,13 +1061,21 @@ class Component extends DCLogic {
       phaseDefs.map((p,i)=>React.createElement("span",{key:i,style:{height:"4px",flex:1,borderRadius:"99px",transition:"background .35s",background: i <= st.genIndex ? "var(--accent)" : "var(--border-default)"}})));
 
     // plan
+    const analysis = st.analysis;
     const firm = this.firm();
-    const ids = this.evaluate(firm);
-    const baseSet = new Set(this.BASELINE);
-    const now = ids.filter(id => this.state2(id) === "now");
-    const later = ids.filter(id => this.state2(id) === "later").sort((a,b) => this.monthIndex(a,firm) - this.monthIndex(b,firm));
+    const ids = analysis ? analysis.obligations.map(o => o.id) : this.evaluate(firm);
+    const baselineIds = analysis ? analysis.baseline : this.BASELINE;
+    const baseSet = new Set(baselineIds);
+    const obligationById = new Map((analysis && analysis.obligations ? analysis.obligations : []).map(o => [o.id, o]));
+    const timelineById = new Map((analysis && analysis.timeline ? analysis.timeline : []).map(t => [t.obligationId, t]));
+    const now = analysis
+      ? analysis.obligations.filter(o => o.state === "PLATI_NYNI" || o.state === "VYZADUJE_OVERENI").map(o => o.id)
+      : ids.filter(id => this.state2(id) === "now");
+    const later = analysis
+      ? analysis.obligations.filter(o => o.state === "VZNIKNE_POZDEJI" || o.state === "POUZE_MONITORUJEME").map(o => o.id)
+      : ids.filter(id => this.state2(id) === "later").sort((a,b) => this.monthIndex(a,firm) - this.monthIndex(b,firm));
     const hidden = ids.filter(id => !baseSet.has(id));
-    const baselineExtra = this.BASELINE.filter(id => ids.indexOf(id) < 0);
+    const baselineExtra = baselineIds.filter(id => ids.indexOf(id) < 0);
 
     const doneMap = st.doneSteps || {};
     const timelineAxisEl = this.buildAxis(firm, now, later, baseSet, doneMap, (k)=>this.toggleStep(k));
@@ -931,9 +1083,15 @@ class Component extends DCLogic {
     const stepsDone = axisStations.filter(s => s.key !== "end" && doneMap[s.key]).length;
     const stepsTotal = axisStations.filter(s => s.key !== "end").length;
     const tile = (id) => {
+      const obligation = obligationById.get(id);
+      const timeline = timelineById.get(id);
       const hid = !baseSet.has(id);
       return {
-        id, label:this.KAT[id], authority:this.AUTH[id], why:this.why(id, firm), icon:this.ic(this.ICN[id]),
+        id,
+        label:(obligation && obligation.label) || this.KAT[id],
+        authority:(timeline && timeline.authority) || this.AUTH[id],
+        why:(obligation && obligation.whyApplies) || this.why(id, firm),
+        icon:this.ic(this.ICN[id]),
         hidden:hid, iconBg: hid?"var(--signal-50)":"var(--surface-card)", iconColor: hid?"var(--accent)":"var(--ink-600)",
         border: hid?"var(--signal-200)":"var(--border-subtle)"
       };
@@ -941,11 +1099,18 @@ class Component extends DCLogic {
     const immediate = now.map(tile);
     const laterCards = later.map((id, i) => Object.assign(tile(id), {due:this.dueText(id, firm), connector: i < later.length - 1}));
 
-    const audit = ids.map(id => ({
-      id, label:this.KAT[id],
-      dataSource: id.startsWith("ZIVNOST") ? "lookup_registry" : (this.state2(id) === "later" ? "záměr + lookup_legislation" : "záměr + katalog"),
-      ruleSource: this.RSRC[id]
-    }));
+    const audit = analysis && analysis.obligations
+      ? analysis.obligations.map(o => ({
+        id:o.id,
+        label:o.label,
+        dataSource:o.dataSource,
+        ruleSource:o.ruleSource
+      }))
+      : ids.map(id => ({
+        id, label:this.KAT[id],
+        dataSource: id.startsWith("ZIVNOST") ? "lookup_registry" : (this.state2(id) === "later" ? "záměr + lookup_legislation" : "záměr + katalog"),
+        ruleSource: this.RSRC[id]
+      }));
 
     const kpis = [
       {label:"Hned", value:now.length, color:"var(--green-700)"},
@@ -991,7 +1156,7 @@ class Component extends DCLogic {
       return v;
     });
 
-    const phaseTag = screen==="canvas" ? "guidance canvas" : (screen==="running" ? "agent · běží" : "plán připraven");
+    const phaseTag = st.apiStatus || (screen==="canvas" ? "guidance canvas" : (screen==="running" ? "agent · běží" : "plán připraven"));
 
     return Object.assign({
       brandMark:this.brand(), phaseTag,
@@ -1023,7 +1188,8 @@ class Component extends DCLogic {
       firmActivity:this.pretty(firm.predmet), firmForma:firm.forma, firmSidlo:firm.sidlo.adresa, firmObrat:this.money(firm.predpokladany_obrat_rok),
       firmEmpl: firm.plan_zamestnancu>0 ? (" · "+firm.plan_zamestnancu+" zam.") : "",
       kpis, timelineAxisEl,
-      baselineCount:this.BASELINE.length, baselineMissed:hidden.length,
+      baselineCount:baselineIds.length,
+      baselineMissed:analysis && analysis.score ? analysis.score.baseline.missed : hidden.length,
       baselineExtraText: baselineExtra.length>0 ? (" a navíc by chybně uvedl volnou živnost") : "",
       audit, showAudit:st.showAudit, toggleAudit:()=>this.toggleAudit(),
       auditLabel: st.showAudit ? "Skrýt zdroje a pravidla" : "Zobrazit zdroje a pravidla (audit "+ids.length+" povinností)",
