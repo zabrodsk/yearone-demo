@@ -280,6 +280,29 @@ export default function Home() {
         </section>
       ) : null}
 
+      <section className="demo-strip" aria-label="Demo scénář">
+        <div className="demo-step active">
+          <span>1</span>
+          FIRMA-0004
+        </div>
+        <div className="demo-step">
+          <span>2</span>
+          Agent dohledá registry
+        </div>
+        <div className="demo-step">
+          <span>3</span>
+          Plán prvního roku
+        </div>
+        <div className="demo-step">
+          <span>4</span>
+          What-if zaměstnanec
+        </div>
+        <div className="demo-step">
+          <span>5</span>
+          Člověk schválí
+        </div>
+      </section>
+
       <section className="dashboard-grid" aria-label="YearOne dashboard">
         <aside className="panel profile-panel">
           <PanelTitle icon={Building2} title="Guidance Canvas" detail="Model firmy pro první rok" />
@@ -558,6 +581,29 @@ export default function Home() {
                 {analysis?.score.firmaradar.missed ?? 0} missed / {analysis?.score.firmaradar.extra ?? 0} extra
               </strong>
             </div>
+          </div>
+
+          <div className="explain-box">
+            <div className="mini-heading">
+              <Layers3 size={15} aria-hidden="true" />
+              Proč je to agent
+            </div>
+            <div className="explain-list">
+              <span>Plánuje kroky</span>
+              <span>Volá nástroje</span>
+              <span>Dohledává registry</span>
+              <span>Odvozuje povinnosti</span>
+              <span>Hlídá čas</span>
+            </div>
+          </div>
+
+          <div className="ethics-box">
+            <div className="mini-heading">
+              <ShieldCheck size={15} aria-hidden="true" />
+              Odpovědnost
+            </div>
+            <p>Výstup není právní rada. Model nevytváří povinnosti, jen vysvětluje výsledek pravidel.</p>
+            <p>Reálné registry by vyžadovaly zákonný titul, souhlas a audit přístupů. Finální krok schvaluje člověk.</p>
           </div>
 
           {analysis?.scenario ? (
