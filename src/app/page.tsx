@@ -130,6 +130,9 @@ export default function Home() {
     };
   }, [analysis?.baseline, analysis?.obligations]);
 
+  const outputPlan = useMemo(() => buildOutputPlan(analysis), [analysis]);
+  const obligationGroups = useMemo(() => groupObligations(analysis?.obligations ?? []), [analysis?.obligations]);
+
   async function loadInitialData() {
     setLoading(true);
     setError(null);
@@ -387,13 +390,23 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="narration-box">
+          <div className="founder-output">
             <div className="mini-heading">
               <ClipboardCheck size={15} aria-hidden="true" />
-              Agentní závěr
+              Výstup pro zakladatele
             </div>
-            <p>{analysis?.model.narration ?? "Analyza se nacte po vyberu firmy."}</p>
-            <span>{analysis?.model.message ?? "Cekam na odpoved backendu."}</span>
+            <div className="plain-summary">
+              {outputPlan.map((item) => (
+                <div className={`summary-step summary-${item.tone}`} key={item.label}>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                  <p>{item.detail}</p>
+                </div>
+              ))}
+            </div>
+            <div className="narration-note">
+              <span>{analysis?.model.narration ?? "Analýza se načte po výběru firmy."}</span>
+            </div>
           </div>
 
           <div className="what-if-workbench" aria-label="What-if simulátor">
@@ -491,6 +504,10 @@ export default function Home() {
           </div>
 
           <div className="tool-call-list" aria-label="Agentni volani nastroju">
+            <div className="mini-heading">
+              <ShieldCheck size={15} aria-hidden="true" />
+              Audit agenta
+            </div>
             {(analysis?.toolCalls ?? []).map((call) => (
               <ToolCallRow call={call} key={call.id} />
             ))}
@@ -580,12 +597,11 @@ export default function Home() {
         </section>
 
         <section className="panel obligations-panel">
-          <PanelTitle icon={ClipboardCheck} title="Povinnosti" detail="Karty s pravidly a zdroji" />
-          <div className="obligation-grid">
-            {(analysis?.obligations ?? []).map((obligation) => (
-              <ObligationItem obligation={obligation} key={obligation.id} />
-            ))}
-            {!analysis?.obligations.length ? <div className="empty-state">Povinnosti se zobrazi po analyze.</div> : null}
+          <PanelTitle icon={ClipboardCheck} title="Plán povinností" detail="Srozumitelně seskupený výstup" />
+          <div className="obligation-section-list">
+            <ObligationSection title="Teď" obligations={obligationGroups.now} empty="Teď není potřeba přidat další krok." />
+            <ObligationSection title="Brzy" obligations={obligationGroups.future} empty="Žádný odložený trigger." />
+            <ObligationSection title="Monitorovat" obligations={obligationGroups.monitor} empty="Bez samostatného monitoringu." />
           </div>
         </section>
 
@@ -643,6 +659,20 @@ function Metric({ label, value, tone }: { label: string; value: number; tone: "b
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
+  );
+}
+
+function ObligationSection({ title, obligations, empty }: { title: string; obligations: ObligationCard[]; empty: string }) {
+  return (
+    <section className="obligation-section">
+      <div className="obligation-section-head">
+        <h3>{title}</h3>
+        <span>{obligations.length}</span>
+      </div>
+      <div className="obligation-stack">
+        {obligations.length ? obligations.map((obligation) => <ObligationItem obligation={obligation} key={obligation.id} />) : <div className="empty-state">{empty}</div>}
+      </div>
+    </section>
   );
 }
 
@@ -709,14 +739,22 @@ function ObligationItem({ obligation }: { obligation: ObligationCard }) {
     <article className="obligation-card">
       <div className="obligation-head">
         <div>
-          <span>{obligation.id}</span>
           <h3>{obligation.label}</h3>
+          <span>{obligation.id}</span>
         </div>
         <div className={stateClass(obligation.state)}>{stateLabels[obligation.state]}</div>
       </div>
-      <p>{obligation.whyApplies}</p>
+      <div className="obligation-explainer">
+        <div>
+          <span>Uděláme</span>
+          <p>{obligation.action}</p>
+        </div>
+        <div>
+          <span>Proč</span>
+          <p>{obligation.whyApplies}</p>
+        </div>
+      </div>
       <div className="obligation-meta">
-        <span>{obligation.action}</span>
         <span>{obligation.dataSource}</span>
         <span>{obligation.ruleSource}</span>
       </div>
@@ -756,6 +794,66 @@ function shortJson(value: unknown): string {
 
 function errorMessage(cause: unknown): string {
   return cause instanceof Error ? cause.message : "Nepodarilo se nacist analyzu.";
+}
+
+function buildOutputPlan(analysis: AnalysisResult | null) {
+  if (!analysis) {
+    return [
+      {
+        label: "Teď",
+        value: "čekám",
+        detail: "Po načtení firmy se ukáže krátký plán.",
+        tone: "blue"
+      },
+      {
+        label: "Brzy",
+        value: "čekám",
+        detail: "Odložené termíny se doplní podle obratu, zaměstnanců a provozovny.",
+        tone: "amber"
+      },
+      {
+        label: "Kontrola",
+        value: "čekám",
+        detail: "Výstup musí schválit člověk.",
+        tone: "red"
+      }
+    ] as const;
+  }
+
+  const now = analysis.obligations.filter((item) => item.state === "PLATI_NYNI").length;
+  const future = analysis.obligations.filter((item) => item.state === "VZNIKNE_POZDEJI").length;
+  const monitored = analysis.obligations.filter((item) => item.state === "POUZE_MONITORUJEME").length;
+  const missed = analysis.score.firmaradar.missed;
+  const extra = analysis.score.firmaradar.extra;
+
+  return [
+    {
+      label: "Teď",
+      value: `${now} kroků`,
+      detail: "Povinnosti, které patří do založení firmy a úvodního nastavení.",
+      tone: "green"
+    },
+    {
+      label: "Brzy",
+      value: `${future + monitored} hlídání`,
+      detail: "Termíny a triggery, které se mohou objevit během prvního roku.",
+      tone: "amber"
+    },
+    {
+      label: "Důkaz",
+      value: `${missed}/${extra}`,
+      detail: "Propásnuté a zbytečné povinnosti na veřejných scorer případech.",
+      tone: missed || extra ? "red" : "blue"
+    }
+  ] as const;
+}
+
+function groupObligations(obligations: ObligationCard[]) {
+  return {
+    now: obligations.filter((item) => item.state === "PLATI_NYNI" || item.state === "VYZADUJE_OVERENI"),
+    future: obligations.filter((item) => item.state === "VZNIKNE_POZDEJI"),
+    monitor: obligations.filter((item) => item.state === "POUZE_MONITORUJEME")
+  };
 }
 
 function stateClass(state: ObligationState): string {

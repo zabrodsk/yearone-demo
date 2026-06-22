@@ -69,14 +69,13 @@ export async function buildLiveModelStatus(
 
 function buildLocalNarration(result?: Pick<AnalysisResult, "firm" | "obligations" | "founderBurden">): string {
   if (!result) {
-    return "Agentni vysvetleni momentalne bezi lokalne. Rozhodnuti dela pravidlovy engine nad sandbox registry.";
+    return "YearOne nejdřív spočítá plán z pravidel a registrů. Model slouží jen k vysvětlení výsledku.";
   }
 
   const future = result.obligations.filter((item) => item.state === "VZNIKNE_POZDEJI").length;
   return [
-    `${result.firm.nazev}: agent nacetl zamer, overil zivnost a vyhodnotil ${result.obligations.length} povinnosti.`,
-    `Budouci hlidani: ${future}. Dotazy zakladateli: ${result.founderBurden}.`,
-    "Zavazne kroky zustavaji pred lidskym schvalenim."
+    `Agent YearOne pro ${result.firm.nazev} sestavil plán s ${result.obligations.length} povinnostmi a ${future} odloženými hlídáními.`,
+    `Zakladatel nemusí doplňovat další data; závazný krok zůstává na lidském schválení.`
   ].join(" ");
 }
 
@@ -145,7 +144,8 @@ function buildNarrationPrompt(result: Pick<AnalysisResult, "firm" | "obligations
   return [
     "Napis kratke ceske vysvetleni pro hackathon demo YearOne.",
     "Nemen seznam povinnosti, nevymyslej nova ID a netvrd, ze jsi provedl zavazne podani.",
-    "Maximalne 3 vety, konkretne pro tuto firmu.",
+    "Presne 2 kratke vety. Prvni veta shrne plan pro firmu. Druha veta rekne, co se bude hlidat nebo schvalovat.",
+    "Nepouzivej odrazky, markdown ani pravnicke fraze.",
     "",
     `Firma: ${result.firm.nazev}`,
     `Predmet: ${result.firm.predmet}`,

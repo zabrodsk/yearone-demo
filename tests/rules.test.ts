@@ -65,7 +65,7 @@ describe("YearOne rules", () => {
   it("survives without model credentials", () => {
     const result = analyzeFirm("FIRMA-0004");
     expect(result.model.mode).toBe("local");
-    expect(result.model.narration).toContain("agent");
+    expect(result.model.narration).toContain("YearOne");
     expect(result.obligations).toHaveLength(10);
   });
 
