@@ -16,7 +16,6 @@ import {
   Layers3,
   Loader2,
   MapPin,
-  Play,
   RefreshCcw,
   Scale,
   SearchCheck,
@@ -97,6 +96,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [approved, setApproved] = useState(false);
   const [approvedAt, setApprovedAt] = useState<string | null>(null);
+  const [completedTimelineIds, setCompletedTimelineIds] = useState<Set<string>>(new Set());
   const activeRequest = useRef(0);
 
   useEffect(() => {
@@ -167,6 +167,7 @@ export default function Home() {
         setScenarioLabel(label);
         setApproved(false);
         setApprovedAt(null);
+        setCompletedTimelineIds(new Set());
       }
     } catch (cause) {
       if (requestId === activeRequest.current) {
@@ -195,6 +196,7 @@ export default function Home() {
         setScenarioLabel(label);
         setApproved(false);
         setApprovedAt(null);
+        setCompletedTimelineIds(new Set());
       }
     } catch (cause) {
       if (requestId === activeRequest.current) {
@@ -227,6 +229,7 @@ export default function Home() {
         setScenarioLabel(`What-if: ${text.length > 34 ? `${text.slice(0, 31)}...` : text}`);
         setApproved(false);
         setApprovedAt(null);
+        setCompletedTimelineIds(new Set());
       }
     } catch (cause) {
       if (requestId === activeRequest.current) {
@@ -249,12 +252,24 @@ export default function Home() {
     setApprovedAt(dateTimeFormatter.format(new Date()));
   }
 
+  function toggleTimelineItem(id: string) {
+    setCompletedTimelineIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
   return (
     <main className="app-shell">
       <header className="topbar">
         <div className="brand-lockup" aria-label="YearOne">
           <div className="brand-mark">
-            <SearchCheck size={22} aria-hidden="true" />
+            <img src="/brand/yearone-mark.svg" alt="" />
           </div>
           <div>
             <p className="eyebrow">YearOne</p>
@@ -303,6 +318,56 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="plan-hero" aria-label="Plán prvního roku">
+        <div>
+          <p className="eyebrow accent-eyebrow">Plán prvního roku</p>
+          <h2>{visibleFirm?.predmet ?? "Načítám firmu"}</h2>
+          <p>
+            {visibleFirm
+              ? `${visibleFirm.forma} · ${visibleFirm.sidlo.adresa} · obrat ${moneyFormatter.format(visibleFirm.predpokladany_obrat_rok)} · ${visibleFirm.plan_zamestnancu} zaměstnanci`
+              : "Agent načítá záměr, registry a pravidla."}
+          </p>
+        </div>
+        <div className="hero-kpis" aria-label="Klíčové metriky">
+          <HeroKpi label="Teď" value={resultCounts.immediate} tone="green" />
+          <HeroKpi label="Brzy" value={resultCounts.future} tone="amber" />
+          <HeroKpi label="Skóre" value={`${analysis?.score.firmaradar.missed ?? 0}/${analysis?.score.firmaradar.extra ?? 0}`} tone="blue" />
+        </div>
+      </section>
+
+      <section className="panel timeline-axis-panel">
+        <div className="timeline-axis-head">
+          <PanelTitle icon={Clock3} title="Timeline prvního roku" detail="Kliknutím označíte krok jako hotový" />
+          <span className="timeline-progress">
+            {completedTimelineIds.size}/{analysis?.timeline.length ?? 0} hotovo
+          </span>
+        </div>
+        <TimelineAxis items={analysis?.timeline ?? []} completedIds={completedTimelineIds} onToggle={toggleTimelineItem} />
+        <div className="timeline-legend">
+          <span>
+            <i className="legend-now" />
+            Platí hned
+          </span>
+          <span>
+            <i className="legend-soon" />
+            Vznikne později
+          </span>
+          <span>
+            <i className="legend-monitor" />
+            Monitorujeme
+          </span>
+          <span>
+            <SearchCheck size={13} aria-hidden="true" />
+            Snadno se opomene
+          </span>
+        </div>
+        <div className="plan-footnote">
+          <ShieldCheck size={16} aria-hidden="true" />
+          <span>YearOne navrhuje a hlídá. Hotové kroky potvrzuje člověk v timeline; výstup je podklad, ne závazná právní rada.</span>
+          <strong>{completedTimelineIds.size}/{analysis?.timeline.length ?? 0} potvrzeno</strong>
+        </div>
+      </section>
+
       <section className="dashboard-grid" aria-label="YearOne dashboard">
         <aside className="panel profile-panel">
           <PanelTitle icon={Building2} title="Guidance Canvas" detail="Model firmy pro první rok" />
@@ -318,7 +383,7 @@ export default function Home() {
             ))}
           </select>
 
-          <div className="firm-list" aria-label="Rychly vyber firmy">
+          <div className="firm-list" aria-label="Rychlý výběr firmy">
             {firms.slice(0, 12).map((firm) => (
               <button
                 className={firm.id === selectedFirmId ? "firm-option active" : "firm-option"}
@@ -334,15 +399,15 @@ export default function Home() {
 
           {visibleFirm ? (
             <div className="profile-facts">
-              <Fact label="Nazev" value={visibleFirm.nazev} />
+              <Fact label="Název" value={visibleFirm.nazev} />
               <Fact label="Předmět" value={visibleFirm.predmet} />
               <Fact label="Sídlo" value={visibleFirm.sidlo.adresa} />
               <Fact label="Obrat" value={moneyFormatter.format(visibleFirm.predpokladany_obrat_rok)} />
-              <Fact label="Zamestnanci" value={`${visibleFirm.plan_zamestnancu}`} />
+              <Fact label="Zaměstnanci" value={`${visibleFirm.plan_zamestnancu}`} />
               <Fact label="Provozovna" value={visibleFirm.provozovna?.adresa ?? "Neuvedena"} />
             </div>
           ) : (
-            <div className="empty-state">Cekam na seznam firem.</div>
+            <div className="empty-state">Čekám na seznam firem.</div>
           )}
 
           {visibleFirm ? (
@@ -534,7 +599,7 @@ export default function Home() {
             {(analysis?.toolCalls ?? []).map((call) => (
               <ToolCallRow call={call} key={call.id} />
             ))}
-            {!analysis?.toolCalls.length ? <div className="empty-state">Zatim nejsou dostupna zadna volani.</div> : null}
+            {!analysis?.toolCalls.length ? <div className="empty-state">Zatím nejsou dostupná žádná volání.</div> : null}
           </div>
         </section>
 
@@ -556,18 +621,18 @@ export default function Home() {
                 {approved ? <CheckCircle2 size={15} aria-hidden="true" /> : <UserRoundCheck size={15} aria-hidden="true" />}
                 Lidské schválení
               </div>
-              <p>{approved ? `Schvaleno ${approvedAt}` : "Vystup ceka na kontrolu clovekem."}</p>
+              <p>{approved ? `Schváleno ${approvedAt}` : "Výstup čeká na kontrolu člověkem."}</p>
             </div>
             <button className="approve-button" type="button" disabled={!analysis || loading || approved} onClick={handleApprove}>
               <CheckCircle2 size={16} aria-hidden="true" />
-              Approve
+              Schválit
             </button>
           </div>
 
           <div className="score-box">
             <div className="mini-heading">
               <Gauge size={15} aria-hidden="true" />
-              Skore sandboxu
+              Skóre sandboxu
             </div>
             <div className="score-row">
               <span>Baseline</span>
@@ -625,16 +690,16 @@ export default function Home() {
         </aside>
       </section>
 
-      <section className="bottom-grid" aria-label="Vysledne artefakty">
+      <section className="bottom-grid" aria-label="Výsledné artefakty">
         <section className="panel comparison-panel">
-          <PanelTitle icon={Scale} title="Baseline vs YearOne" detail={`${analysis?.score.cases ?? 0} testovacich pripadu`} />
+          <PanelTitle icon={Scale} title="Baseline vs YearOne" detail={`${analysis?.score.cases ?? 0} testovacích případů`} />
           <div className="comparison-grid">
             <ComparisonColumn title="Baseline" ids={comparison.baseline} tone="baseline" />
             <ComparisonColumn title="YearOne" ids={comparison.radar} tone="radar" />
           </div>
           <div className="delta-row">
             <span>
-              Pridano agentem: <strong>{comparison.addedByRadar.length}</strong>
+              Přidáno agentem: <strong>{comparison.addedByRadar.length}</strong>
             </span>
             <span>
               Jen baseline: <strong>{comparison.baselineOnly.length}</strong>
@@ -651,25 +716,34 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="panel timeline-panel">
-          <PanelTitle icon={Clock3} title="Timeline prvního roku" detail="Personalizovaný plán hlídání" />
-          <div className="timeline-list">
-            {(analysis?.timeline ?? []).map((item) => (
-              <article className="timeline-item" key={item.id}>
-                <div className={stateClass(item.status)}>
-                  <Play size={13} aria-hidden="true" />
-                  {stateLabels[item.status]}
-                </div>
-                <div>
-                  <h3>{item.label}</h3>
-                  <p>{item.reason}</p>
-                  <span>{item.authority}</span>
-                </div>
-                <strong>{item.due}</strong>
-              </article>
-            ))}
-            {!analysis?.timeline.length ? <div className="empty-state">Timeline zatim neni k dispozici.</div> : null}
+        <section className="panel agent-sidebar-panel">
+          <PanelTitle icon={Wand2} title="YearOne agent" detail="Simulace a otázky k plánu" />
+          <div className="agent-message">
+            Plán prvního roku je hotový. Vyberte scénář nebo napište vlastní otázku a agent spočítá dopad, než cokoli přidá do plánu.
           </div>
+          <div className="agent-prompt-list">
+            <button type="button" disabled={loading} onClick={() => runScenario({ type: "employee_start", text: "Co když zaměstnanec nastoupí 15. září?", employeeStartDate: "15. září" }, "Zaměstnanec 15. září")}>
+              Zaměstnanec od 15. září
+            </button>
+            <button type="button" disabled={loading} onClick={() => runScenario({ type: "increase_turnover", text: "Co když obrat vzroste na 3 miliony?", turnover: 3_000_000 }, "DPH limit")}>
+              Obrat přes DPH limit
+            </button>
+            <button type="button" disabled={loading} onClick={() => runScenario({ type: "open_branch", text: "Co když otevřu pobočku v Brně?", address: "Pobočka Brno" }, "Provozovna Brno")}>
+              Pobočka v Brně
+            </button>
+          </div>
+          <form className="scenario-form compact" onSubmit={runScenarioQuestion}>
+            <input
+              aria-label="Volná what-if otázka"
+              disabled={loading}
+              value={scenarioText}
+              onChange={(event) => setScenarioText(event.target.value)}
+              placeholder="Zeptejte se na vlastní scénář…"
+            />
+            <button className="icon-text-button" type="submit" disabled={loading || !scenarioText.trim()}>
+              <Send size={15} aria-hidden="true" />
+            </button>
+          </form>
         </section>
       </section>
     </main>
@@ -704,6 +778,53 @@ function Metric({ label, value, tone }: { label: string; value: number; tone: "b
     <div className={`metric metric-${tone}`}>
       <span>{label}</span>
       <strong>{value}</strong>
+    </div>
+  );
+}
+
+function HeroKpi({ label, value, tone }: { label: string; value: number | string; tone: "blue" | "green" | "amber" }) {
+  return (
+    <div className={`hero-kpi hero-kpi-${tone}`}>
+      <strong>{value}</strong>
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function TimelineAxis({
+  items,
+  completedIds,
+  onToggle
+}: {
+  items: AnalysisResult["timeline"];
+  completedIds: Set<string>;
+  onToggle: (id: string) => void;
+}) {
+  if (!items.length) {
+    return <div className="empty-state">Timeline zatím není k dispozici.</div>;
+  }
+
+  return (
+    <div className="timeline-axis-scroll">
+      <div className="timeline-axis" style={{ minWidth: Math.max(760, items.length * 168) }}>
+        {items.map((item, index) => {
+          const completed = completedIds.has(item.id);
+          return (
+            <article className={`axis-node ${axisStateClass(item.status)} ${completed ? "axis-done" : ""}`} key={item.id}>
+              {index > 0 ? <span className="axis-connector" aria-hidden="true" /> : null}
+              <span className="axis-date">{item.due}</span>
+              <button type="button" className="axis-marker" onClick={() => onToggle(item.id)} aria-label={`Označit ${item.label}`}>
+                {completed ? <CheckCircle2 size={17} aria-hidden="true" /> : <span />}
+              </button>
+              <h3>{item.label}</h3>
+              <p>{item.reason}</p>
+              <button type="button" className="axis-done-button" onClick={() => onToggle(item.id)}>
+                {completed ? "Hotovo" : "Označit hotové"}
+              </button>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -824,7 +945,7 @@ async function requestJson<T>(url: string, options: RequestInit = {}): Promise<T
     } catch {
       details = null;
     }
-    throw new Error(details?.message ?? `${url} vratilo ${response.status}`);
+    throw new Error(details?.message ?? `${url} vrátilo ${response.status}`);
   }
 
   return (await response.json()) as T;
@@ -839,7 +960,7 @@ function shortJson(value: unknown): string {
 }
 
 function errorMessage(cause: unknown): string {
-  return cause instanceof Error ? cause.message : "Nepodarilo se nacist analyzu.";
+  return cause instanceof Error ? cause.message : "Nepodařilo se načíst analýzu.";
 }
 
 function buildOutputPlan(analysis: AnalysisResult | null) {
@@ -904,4 +1025,10 @@ function groupObligations(obligations: ObligationCard[]) {
 
 function stateClass(state: ObligationState): string {
   return `state-badge state-${state.toLowerCase()}`;
+}
+
+function axisStateClass(state: ObligationState): string {
+  if (state === "PLATI_NYNI" || state === "VYZADUJE_OVERENI") return "axis-now";
+  if (state === "VZNIKNE_POZDEJI") return "axis-soon";
+  return "axis-monitor";
 }
