@@ -1,0 +1,9 @@
+/* Year One — Webfonts
+ * Display:  Space Grotesk  (geometric grotesque, technical confidence)
+ * Body/UI:  Hanken Grotesk (humanist neutral, highly legible)
+ * Mono:     JetBrains Mono (agent output, code, data, telemetry)
+ *
+ * Loaded from Google Fonts. These are deliberate brand choices for a
+ * from-scratch identity, not substitutions for unavailable files.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');

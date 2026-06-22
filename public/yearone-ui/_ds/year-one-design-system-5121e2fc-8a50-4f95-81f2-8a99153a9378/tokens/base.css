@@ -1,0 +1,72 @@
+/* Year One — Base element styling & primitives
+ * Light reset + sensible defaults so raw HTML inherits the brand.
+ * Helper classes (.yo-*) provide quick type/eyebrow primitives for
+ * specimen cards and prose; components style themselves via tokens.
+ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--text-body);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'ss01', 'cv01';
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  color: var(--text-strong);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  text-wrap: balance;
+}
+h1 { font-size: var(--text-4xl); letter-spacing: var(--tracking-tighter); line-height: var(--leading-tight); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+
+p { margin: 0; text-wrap: pretty; }
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+::selection { background: var(--signal-200); color: var(--ink-900); }
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Prose / specimen helpers ---- */
+.yo-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.yo-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tighter);
+  line-height: var(--leading-tight);
+  color: var(--text-strong);
+}
+.yo-mono { font-family: var(--font-mono); }
+.yo-muted { color: var(--text-muted); }

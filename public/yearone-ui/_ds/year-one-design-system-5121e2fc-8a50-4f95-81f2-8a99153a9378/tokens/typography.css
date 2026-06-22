@@ -1,0 +1,44 @@
+/* Year One — Typography
+ * Display: Space Grotesk · Body/UI: Hanken Grotesk · Mono: JetBrains Mono
+ * Type is set tight and confident; display tracking is negative, body is
+ * neutral, mono carries agent/telemetry output.
+ */
+:root {
+  /* ---- Families ---- */
+  --font-display: 'Space Grotesk', 'Hanken Grotesk', system-ui, sans-serif;
+  --font-body:    'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* ---- Weights ---- */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ---- Type scale (1.250 major-third-ish, tuned) ---- */
+  --text-2xs: 11px;
+  --text-xs:  12px;
+  --text-sm:  13px;
+  --text-md:  15px;  /* base body */
+  --text-lg:  17px;
+  --text-xl:  20px;
+  --text-2xl: 25px;
+  --text-3xl: 31px;
+  --text-4xl: 40px;
+  --text-5xl: 52px;
+  --text-6xl: 68px;
+  --text-7xl: 88px;
+
+  /* ---- Line heights ---- */
+  --leading-tight:   1.05; /* display */
+  --leading-snug:    1.2;  /* headings */
+  --leading-normal:  1.5;  /* body */
+  --leading-relaxed: 1.65; /* long-form */
+
+  /* ---- Letter spacing ---- */
+  --tracking-tighter: -0.03em; /* large display */
+  --tracking-tight:   -0.015em;/* headings */
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-caps:    0.08em;  /* eyebrows / labels */
+}

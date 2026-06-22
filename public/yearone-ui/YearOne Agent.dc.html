@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/tokens/colors.css">
+<link rel="stylesheet" href="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/tokens/typography.css">
+<link rel="stylesheet" href="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/tokens/base.css">
+<link rel="stylesheet" href="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/styles.css">
+<script src="_ds/year-one-design-system-5121e2fc-8a50-4f95-81f2-8a99153a9378/_ds_bundle.js"></script>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  @keyframes yoUp{from{transform:translateY(10px)}to{transform:translateY(0)}}
+  @keyframes yoFade{from{opacity:.55}to{opacity:1}}
+  @keyframes yoSpin{to{transform:rotate(360deg)}}
+  @keyframes yoDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
+  .yoRise{animation:yoUp .42s cubic-bezier(.2,.7,.3,1) both}
+  .yoFade{animation:yoFade .5s ease both}
+  .yoSpin{animation:yoSpin .8s linear infinite}
+  .yoDot{animation:yoDot 1.1s ease-in-out infinite}
+  @media (prefers-reduced-motion: reduce){.yoRise,.yoFade,.yoSpin,.yoDot{animation:none}}
+  .yoScroll::-webkit-scrollbar{height:8px}
+  .yoScroll::-webkit-scrollbar-thumb{background:var(--ink-200);border-radius:99px}
+</style>
+</helmet>
+<div style="min-height:100vh;background:var(--paper);font-family:var(--font-body);color:var(--text-body);font-size:var(--text-md);">
+
+  <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 30px;background:rgba(250,250,251,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-default);">
+    <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:11px;cursor:pointer;">
+      <div style="width:32px;height:32px;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:var(--shadow-sm);font-size:18px;">{{ brandMark }}</div>
+      <div style="display:flex;flex-direction:column;line-height:1.1;">
+        <span style="font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--text-strong);">YearOne</span>
+        <span style="font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);">AI agent pro první rok firmy</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);font-family:var(--font-mono);">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--green-500);box-shadow:0 0 0 3px var(--green-50);"></span>
+      {{ phaseTag }}
+    </div>
+  </header>
+
+  <!-- ════════════ WIZARD ════════════ -->
+  <sc-if value="{{ isCanvas }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:920px;margin:0 auto;padding:52px 26px 96px;display:flex;flex-direction:column;align-items:center;">
+    <div style="width:100%;max-width:760px;display:flex;align-items:flex-end;gap:16px;margin-bottom:48px;padding-bottom:6px;">
+      {{ progressEl }}
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);white-space:nowrap;padding-bottom:2px;">{{ stepLabel }}</span>
+    </div>
+
+    <div class="yoRise" style="width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;">
+      <sc-if value="{{ hasRecap }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:22px;">
+          <sc-for list="{{ recap }}" as="r" hint-placeholder-count="2">
+            <span onClick="{{ r.onClick }}" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-muted);background:var(--surface-sunken);border:1px solid var(--border-subtle);border-radius:99px;padding:4px 11px;cursor:pointer;">{{ r.value }}</span>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <h1 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:34px;letter-spacing:-.02em;color:var(--text-strong);line-height:1.12;max-width:680px;">{{ qTitle }}</h1>
+      <p style="margin:13px 0 0;color:var(--text-muted);font-size:15px;line-height:1.5;max-width:560px;">{{ qSub }}</p>
+
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 8px;max-width:800px;margin-top:34px;">
+        <sc-for list="{{ pills }}" as="p" hint-placeholder-count="4">
+          <button onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</button>
+        </sc-for>
+        <sc-if value="{{ customClosed }}">
+          <button onClick="{{ openCustom }}" style="padding:9px 16px;border-radius:10px;border:1px dashed var(--border-strong);background:transparent;cursor:pointer;font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:all .14s;">{{ customPillLabel }}</button>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ customIsOpen }}">
+        <div style="display:flex;gap:9px;align-items:center;width:100%;max-width:440px;margin-top:16px;padding:10px;border-radius:12px;border:1px solid var(--accent);background:var(--accent-tint);">
+          <input value="{{ customVal }}" onInput="{{ onCustomInput }}" onKeyDown="{{ onCustomKey }}" placeholder="{{ customPlaceholder }}" style="flex:1;font-family:var(--font-body);font-size:14px;color:var(--text-strong);background:var(--surface-card);border:1px solid var(--border-default);border-radius:8px;padding:11px 13px;" />
+          <x-import component-from-global-scope="YearOneDesignSystem_5121e2.Button" variant="primary" onClick="{{ confirmCustom }}" hint-size="98px,40px">Potvrdit</x-import>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:50px;">
+        <sc-if value="{{ canBack }}">
+          <button onClick="{{ back }}" style="display:inline-flex;align-items:center;gap:7px;font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text-muted);background:transparent;border:none;cursor:pointer;padding:10px 8px;">{{ iconArrowLeft }} Zpět</button>
+        </sc-if>
+        <button onClick="{{ onNext }}" style="display:inline-flex;align-items:center;gap:11px;font-family:var(--font-body);font-size:15px;font-weight:600;color:var(--text-body);background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:13px;padding:15px 30px;cursor:pointer;box-shadow:var(--shadow-md);transition:all .16s;" style-hover="box-shadow:var(--shadow-lg);transform:translateY(-1px);border-color:var(--border-default);">{{ nextLabel }} <span style="display:grid;place-items:center;color:var(--text-muted);">{{ iconArrow }}</span></button>
+      </div>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ════════════ GENERATING ════════════ -->
+  <sc-if value="{{ isRunning }}">
+  <main style="max-width:560px;margin:0 auto;padding:120px 26px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+    <div style="margin-bottom:30px;">
+      <x-import component-from-global-scope="YearOneDesignSystem_5121e2.AgentThinking" size="lg" hint-size="60px,60px"></x-import>
+    </div>
+    <h1 style="margin:0 0 8px;font-family:var(--font-display);font-weight:600;font-size:26px;letter-spacing:-.02em;color:var(--text-strong);">Agent sestavuje váš plán</h1>
+    <p class="yoFade" style="margin:0 0 30px;color:var(--accent);font-size:15px;font-weight:500;min-height:22px;">{{ genLabel }}</p>
+    {{ genBarsEl }}
+    <div style="margin-top:18px;font-family:var(--font-mono);font-size:11px;color:var(--text-subtle);">{{ genTool }}</div>
+  </main>
+  </sc-if>
+
+  <!-- ════════════ PLAN ════════════ -->
+  <sc-if value="{{ isPlan }}">
+  <main style="max-width:1500px;margin:0 auto;padding:0;display:flex;align-items:flex-start;">
+    <div style="flex:1;min-width:0;padding:34px 30px 72px;">
+    <div class="yoRise" style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:22px;">
+      <div>
+        <p style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;">Plán prvního roku</p>
+        <h1 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-.02em;color:var(--text-strong);line-height:1.05;">{{ firmActivity }}</h1>
+        <p style="margin:9px 0 0;color:var(--text-muted);font-size:14px;">{{ firmForma }} · {{ firmSidlo }} · obrat {{ firmObrat }}{{ firmEmpl }}</p>
+      </div>
+      <div style="display:flex;gap:22px;align-items:flex-end;">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+          <div style="text-align:center;">
+            <div style="font-family:var(--font-display);font-size:27px;font-weight:600;color:{{ k.color }};line-height:1;">{{ k.value }}</div>
+            <div style="font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);margin-top:5px;">{{ k.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- ░░ FULL-WIDTH TIMELINE ░░ -->
+    <section class="yoRise" style="background:var(--surface-card);border:1px solid var(--border-default);border-radius:14px;box-shadow:var(--shadow-sm);padding:26px 28px;margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;gap:11px;margin-bottom:22px;">
+        <span style="font-size:18px;color:var(--accent);display:grid;place-items:center;margin-top:3px;">{{ iconCalendar }}</span>
+        <div>
+          <h2 style="margin:0;font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--text-strong);">Timeline prvního roku</h2>
+          <p style="margin:4px 0 0;font-size:13px;color:var(--text-muted);line-height:1.45;">Co a kdy musíte vyřídit. Hotové kroky potvrdíte klepnutím na <strong style="color:var(--text-body);font-weight:600;">Označit hotové</strong> u uzlu — modré větve nad linkou jsou volitelná doporučení pro růst.</p>
+        </div>
+      </div>
+
+      <div class="yoScroll" style="overflow-x:auto;padding:6px 2px 4px;">
+        {{ timelineAxisEl }}
+      </div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:11.5px;color:var(--text-muted);">
+        <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--accent);"></span>Platí hned</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--amber-500);"></span>Vznikne později — agent hlídá trigger</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--border-strong);"></span>Kontrolní bod</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--accent);display:grid;place-items:center;">{{ iconSearchCheckSm }}</span>Skrytá — snadno se opomene</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--accent-tint);border:1.5px dashed var(--accent);"></span>Doporučení pro růst (volitelné)</span>
+      </div>
+
+      <!-- audit toggle -->
+      <div style="margin-top:22px;border-top:1px solid var(--border-subtle);padding-top:16px;">
+        <button onClick="{{ toggleAudit }}" style="display:inline-flex;align-items:center;gap:7px;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-muted);background:transparent;border:none;cursor:pointer;padding:0;">
+          <span style="font-size:15px;display:grid;place-items:center;transition:transform .2s;transform:rotate({{ auditChevron }});">{{ iconChevron }}</span>
+          {{ auditLabel }}
+        </button>
+        <sc-if value="{{ showAudit }}">
+          <div class="yoFade" style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <sc-for list="{{ audit }}" as="a" hint-placeholder-count="6">
+              <div style="display:flex;gap:10px;align-items:flex-start;background:var(--surface-sunken);border:1px solid var(--border-subtle);border-radius:8px;padding:10px 12px;">
+                <span style="font-family:var(--font-mono);font-size:9.5px;color:var(--ink-700);background:var(--surface-card);border:1px solid var(--border-default);border-radius:4px;padding:2px 6px;white-space:nowrap;flex:none;margin-top:1px;">{{ a.id }}</span>
+                <div style="min-width:0;">
+                  <strong style="font-size:12.5px;font-weight:600;color:var(--text-strong);">{{ a.label }}</strong>
+                  <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px;">
+                    <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-subtle);">{{ iconDb }}<span style="font-family:var(--font-mono);">{{ a.dataSource }}</span></span>
+                    <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-subtle);">{{ iconScaleSm }}{{ a.ruleSource }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </section>
+
+    <!-- disclaimer + progress (no approval card; steps are confirmed on the timeline) -->
+    <div class="yoRise" style="display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:6px 2px 40px;font-size:12.5px;color:var(--text-muted);">
+      <span style="font-size:16px;color:var(--text-subtle);display:grid;place-items:center;">{{ iconShield }}</span>
+      <span style="line-height:1.45;">YearOne jen navrhuje a hlídá — <strong style="color:var(--text-body);font-weight:600;">co je hotové, potvrzujete klepnutím na krok v timeline</strong>. Výstup je podklad, ne závazná právní rada.</span>
+      <span style="margin-left:auto;font-family:var(--font-mono);font-size:12px;font-weight:600;color:{{ stepsColor }};white-space:nowrap;">{{ stepsSummary }}</span>
+    </div>
+
+    </div><!-- /plan-main left column -->
+
+    <!-- ░░ CHATBOT SIDEBAR ░░ -->
+    <sc-if value="{{ chatOpen }}">
+    <aside class="yoRise" style="position:sticky;top:64px;flex:none;width:384px;height:calc(100vh - 64px);border-left:1px solid var(--border-default);background:var(--surface-card);display:flex;flex-direction:column;">
+      <div style="flex:none;display:flex;align-items:center;gap:11px;padding:15px 18px;border-bottom:1px solid var(--border-subtle);">
+        <span style="width:34px;height:34px;flex:none;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:19px;">{{ brandMark }}</span>
+        <div style="min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text-strong);line-height:1.2;">YearOne agent</div>
+          <div style="font-size:11.5px;color:var(--text-subtle);">Simulace a otázky k plánu</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:11px;">
+          <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green-700);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green-500);"></span>online</span>
+          <button onClick="{{ toggleChat }}" title="Skrýt asistenta" style="width:30px;height:30px;flex:none;border-radius:8px;border:1px solid var(--border-default);background:var(--surface-card);color:var(--text-muted);cursor:pointer;display:grid;place-items:center;font-size:15px;" style-hover="background:var(--surface-sunken);color:var(--text-strong);">{{ iconX }}</button>
+        </div>
+      </div>
+
+      <div id="yo-chat" class="yoScroll" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;">
+        <div style="align-self:flex-start;max-width:92%;background:var(--surface-sunken);border:1px solid var(--border-subtle);border-radius:13px;border-top-left-radius:4px;padding:11px 14px;font-size:13px;color:var(--text-body);line-height:1.5;">Plán prvního roku je hotový. Napište nebo vyberte, co se ve firmě chystá změnit — projdu to s vámi, doptám se na termíny a spočítám dopad na plán, než cokoli přidám.</div>
+
+        <sc-for list="{{ thread }}" as="m" hint-placeholder-count="0">
+          <!-- user message -->
+          <sc-if value="{{ m.isUser }}">
+            <div class="yoFade" style="align-self:flex-end;max-width:86%;background:var(--accent);color:#fff;border-radius:13px;border-bottom-right-radius:4px;padding:10px 14px;font-size:13px;line-height:1.5;">{{ m.text }}</div>
+          </sc-if>
+
+          <!-- agent text turn (clarify / answer) -->
+          <sc-if value="{{ m.isAgent }}">
+            <div class="yoFade" style="align-self:stretch;display:flex;flex-direction:column;">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;">
+                <span style="width:21px;height:21px;flex:none;border-radius:6px;background:var(--accent-tint);color:var(--accent);display:grid;place-items:center;font-size:11px;">{{ iconGitBranch }}</span>
+                <span style="font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;color:var(--text-subtle);">{{ m.tag }}</span>
+              </div>
+              <div style="background:var(--surface-sunken);border:1px solid var(--border-subtle);border-radius:13px;border-top-left-radius:4px;padding:13px 15px;font-size:13px;color:var(--text-body);line-height:1.55;">
+                <p style="margin:0;white-space:pre-line;">{{ m.intro }}</p>
+
+                <sc-if value="{{ m.hasLines }}">
+                  <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+                    <sc-for list="{{ m.lines }}" as="ln" hint-placeholder-count="2">
+                      <div style="display:flex;gap:9px;align-items:flex-start;">
+                        <span style="flex:none;margin-top:1px;color:var(--accent);font-size:13px;">{{ ln.icon }}</span>
+                        <div style="min-width:0;flex:1;">
+                          <div style="color:var(--text-strong);font-weight:500;">{{ ln.label }}</div>
+                          <sc-if value="{{ ln.hasMeta }}"><div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">{{ ln.meta }}</div></sc-if>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ m.outro }}">
+                  <p style="margin:12px 0 0;color:var(--text-muted);font-size:12.5px;">{{ m.outroText }}</p>
+                </sc-if>
+
+                <!-- clarify controls -->
+                <sc-if value="{{ m.isClarify }}">
+                  <div style="margin-top:14px;padding-top:13px;border-top:1px solid var(--border-default);display:flex;flex-direction:column;gap:11px;">
+                    <label style="display:flex;flex-direction:column;gap:5px;">
+                      <span style="font-size:11.5px;color:var(--text-muted);">{{ m.dateLabel }}</span>
+                      <input type="date" value="{{ clarifyDate }}" onInput="{{ onClarifyDate }}" style="font-family:var(--font-body);font-size:13px;color:var(--text-strong);background:var(--surface-card);border:1px solid var(--border-strong);border-radius:9px;padding:9px 11px;outline:none;" style-focus="border-color:var(--accent);" />
+                    </label>
+                    <button onClick="{{ m.onContinue }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:600;" style-hover="filter:brightness(1.05);">Spočítat dopad {{ iconArrow }}</button>
+                  </div>
+                </sc-if>
+
+                <!-- answer controls -->
+                <sc-if value="{{ m.isAnswer }}">
+                  <div style="margin-top:14px;padding-top:13px;border-top:1px solid var(--border-default);display:flex;gap:8px;">
+                    <button onClick="{{ m.onAdd }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:9px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:600;" style-hover="filter:brightness(1.05);"><span style="font-size:14px;">{{ iconPlus }}</span>Přidat do plánu</button>
+                    <button onClick="{{ m.onCancel }}" style="flex:none;padding:10px 16px;border-radius:9px;border:1px solid var(--border-strong);cursor:pointer;background:var(--surface-card);color:var(--text-muted);font-family:var(--font-body);font-size:13px;font-weight:600;" style-hover="background:var(--surface-sunken);color:var(--text-strong);">Zrušit</button>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- committing card (planning animation) -->
+          <sc-if value="{{ m.isCommitting }}">
+            <div class="yoRise" style="align-self:stretch;background:var(--surface-card);border:1px solid var(--signal-200);border-radius:12px;box-shadow:var(--shadow-sm);padding:14px 16px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="yoSpin" style="width:17px;height:17px;flex:none;border-radius:50%;border:2px solid var(--accent-tint);border-top-color:var(--accent);"></span>
+                <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-strong);">{{ m.commitPhase }}</span>
+              </div>
+              <div style="margin-top:11px;height:3px;border-radius:3px;background:var(--surface-sunken);overflow:hidden;"><span style="display:block;height:100%;border-radius:3px;background:var(--accent);width:{{ m.commitPct }};transition:width .35s ease;"></span></div>
+            </div>
+          </sc-if>
+
+          <!-- result line -->
+          <sc-if value="{{ m.isDone }}">
+            <div class="yoFade" style="align-self:flex-start;max-width:94%;display:flex;align-items:flex-start;gap:9px;background:var(--green-50);border:1px solid var(--green-100);border-radius:12px;padding:11px 14px;font-size:13px;color:var(--green-700);line-height:1.45;"><span style="flex:none;margin-top:1px;">{{ iconCheck }}</span><span>{{ m.text }}</span></div>
+          </sc-if>
+
+          <!-- neutral note (cancelled) -->
+          <sc-if value="{{ m.isNote }}">
+            <div class="yoFade" style="align-self:flex-start;max-width:94%;font-size:12px;color:var(--text-subtle);padding:2px 4px;">{{ m.text }}</div>
+          </sc-if>
+        </sc-for>
+
+        <!-- thinking indicator -->
+        <sc-if value="{{ thinking }}">
+          <div style="align-self:flex-start;display:flex;align-items:center;gap:10px;padding:3px 2px;">
+            <span style="width:21px;height:21px;flex:none;border-radius:6px;background:var(--accent-tint);color:var(--accent);display:grid;place-items:center;font-size:11px;">{{ iconGitBranch }}</span>
+            <span style="display:flex;gap:4px;align-items:center;">
+              <span class="yoDot" style="width:6px;height:6px;border-radius:50%;background:var(--text-subtle);"></span>
+              <span class="yoDot" style="width:6px;height:6px;border-radius:50%;background:var(--text-subtle);animation-delay:.18s;"></span>
+              <span class="yoDot" style="width:6px;height:6px;border-radius:50%;background:var(--text-subtle);animation-delay:.36s;"></span>
+            </span>
+            <span style="font-size:12px;color:var(--text-subtle);">{{ thinkingLabel }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="flex:none;border-top:1px solid var(--border-subtle);padding:12px;position:relative;">
+        <sc-if value="{{ whatifOpen }}">
+          <div class="yoFade" style="position:absolute;left:12px;right:12px;bottom:calc(100% - 2px);background:var(--surface-card);border:1px solid var(--border-default);border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden;z-index:20;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-subtle);">
+              <span style="font-size:10.5px;font-family:var(--font-mono);letter-spacing:.06em;color:var(--text-subtle);">CO MŮŽETE VYZKOUŠET</span>
+              <button onClick="{{ toggleWhatif }}" style="width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--text-subtle);cursor:pointer;display:grid;place-items:center;font-size:13px;">{{ iconX }}</button>
+            </div>
+            <div class="yoScroll" style="max-height:264px;overflow-y:auto;">
+              <sc-for list="{{ presets }}" as="p" hint-placeholder-count="6">
+                <button onClick="{{ p.onClick }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;padding:11px 14px;border:none;border-top:1px solid var(--border-subtle);background:transparent;cursor:pointer;font-family:var(--font-body);transition:background .14s;" style-hover="background:var(--surface-sunken);">
+                  <span style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                    <strong style="font-size:13px;font-weight:600;color:var(--text-strong);line-height:1.3;">{{ p.title }}</strong>
+                    <span style="font-size:11.5px;color:var(--text-muted);line-height:1.3;">{{ p.desc }}</span>
+                  </span>
+                  <span style="flex:none;font-size:15px;color:var(--text-subtle);display:grid;place-items:center;">{{ p.arrow }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:flex-end;gap:8px;background:var(--surface-card);border:1px solid var(--border-strong);border-radius:11px;padding:7px 7px 7px 8px;">
+          <button onClick="{{ toggleWhatif }}" title="Co se změní, když…" style="width:36px;height:36px;flex:none;border-radius:9px;cursor:pointer;border:1px solid var(--accent);background:var(--accent-tint);color:var(--accent);display:grid;place-items:center;font-size:16px;transition:all .14s;" style-hover="background:var(--accent);color:#fff;">{{ iconGitBranch }}</button>
+          <textarea value="{{ freeText }}" onInput="{{ setFree }}" onKeyDown="{{ onFreeKey }}" placeholder="Zeptejte se na vlastní scénář…" rows="1" style="flex:1;font-family:var(--font-body);font-size:13.5px;color:var(--text-strong);background:transparent;border:none;outline:none;resize:none;line-height:1.5;padding:6px 0;max-height:90px;"></textarea>
+          <button onClick="{{ runFree }}" style="width:36px;height:36px;flex:none;border-radius:9px;border:none;cursor:pointer;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:16px;box-shadow:var(--shadow-xs);">{{ iconSend }}</button>
+        </div>
+      </div>
+    </aside>
+    </sc-if>
+
+    <!-- reopen tab when sidebar is closed -->
+    <sc-if value="{{ chatClosed }}">
+      <button onClick="{{ toggleChat }}" title="Otevřít asistenta" style="position:fixed;right:22px;bottom:22px;z-index:40;display:inline-flex;align-items:center;gap:9px;padding:12px 17px 12px 13px;border-radius:13px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-family:var(--font-body);font-size:13.5px;font-weight:600;box-shadow:var(--shadow-lg);" style-hover="transform:translateY(-1px);">
+        <span style="width:26px;height:26px;flex:none;border-radius:7px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:16px;">{{ iconGitBranch }}</span>
+        YearOne agent
+      </button>
+    </sc-if>
+  </main>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:900},&quot;autoAdvance&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;pipelineSpeed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;svižné&quot;,&quot;options&quot;:[&quot;klidné&quot;,&quot;svižné&quot;,&quot;okamžité&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: "canvas",
+    step: 0,
+    answers: {},
+    labels: {},
+    customOpen: false,
+    customVal: "",
+    genIndex: 0,
+
+    freeText: "",
+    showAudit: false,
+    whatifOpen: false,
+    chatOpen: true,
+    thread: [],
+    thinking: false,
+    thinkingLabel: "",
+    activeId: null,
+    clarifyDate: "",
+    commitPhase: "",
+    commitPct: "0%"
+  };
+
+  // ───────── data ─────────
+  KAT = {
+    OR_ZAPIS:"Zápis do obchodního rejstříku", DPPO:"Registrace k dani z příjmů PO", DATOVKA:"Zřízení datové schránky",
+    ZIVNOST_VOLNA:"Ohlášení volné živnosti", ZIVNOST_VAZANA:"Vázaná živnost (odborná způsobilost)", ZIVNOST_KONCESE:"Koncesovaná živnost (koncese)",
+    SIDLO_OZNACENI:"Označení sídla firmy", SKUTECNI_MAJITELE:"Evidence skutečných majitelů", DPH:"Registrace k DPH",
+    ZAM_CSSZ:"Přihlášení zaměstnavatele na ČSSZ", ZAM_ZP:"Oznámení zdravotní pojišťovně", PROVOZOVNA:"Ohlášení provozovny"
+  };
+  AUTH = {
+    OR_ZAPIS:"Rejstříkový soud", DPPO:"Finanční správa", DATOVKA:"Ministerstvo vnitra",
+    ZIVNOST_VOLNA:"Živnostenský úřad", ZIVNOST_VAZANA:"Živnostenský úřad", ZIVNOST_KONCESE:"Živnostenský úřad",
+    SIDLO_OZNACENI:"Místní úřad", SKUTECNI_MAJITELE:"Evidence skut. majitelů", DPH:"Finanční správa",
+    ZAM_CSSZ:"ČSSZ", ZAM_ZP:"Zdravotní pojišťovna", PROVOZOVNA:"Živnostenský úřad"
+  };
+  RSRC = {
+    OR_ZAPIS:"zákon o obch. korporacích", DPPO:"katalog: daň z příjmů PO", DATOVKA:"automaticky pro s.r.o.",
+    ZIVNOST_VOLNA:"registr živností: volná", ZIVNOST_VAZANA:"registr živností: vázaná", ZIVNOST_KONCESE:"registr živností: koncese",
+    SIDLO_OZNACENI:"katalog: označení sídla", SKUTECNI_MAJITELE:"evidence skut. majitelů",
+    DPH:"pravidlo dph-threshold-v1: obrat > 2 000 000 Kč", ZAM_CSSZ:"katalog: první zaměstnanec", ZAM_ZP:"katalog: první zaměstnanec", PROVOZOVNA:"katalog: provozovna"
+  };
+  ICN = {
+    OR_ZAPIS:"file-check", DPPO:"landmark", DATOVKA:"database", ZIVNOST_VOLNA:"scale", ZIVNOST_VAZANA:"scale", ZIVNOST_KONCESE:"scale",
+    SIDLO_OZNACENI:"map-pin", SKUTECNI_MAJITELE:"shield-check", DPH:"banknote", ZAM_CSSZ:"users", ZAM_ZP:"users", PROVOZOVNA:"store"
+  };
+  ZIV = {
+    "Maloobchod a velkoobchod":"volna","Marketingove sluzby":"volna","Vyvoj softwaru a IT sluzby":"volna","Graficky design":"volna",
+    "Poradenstvi v oblasti podnikani":"volna","Provoz e-shopu":"volna","Ucetnictvi a danove poradenstvi":"vazana","Realitni zprostredkovani":"vazana",
+    "Montaz a opravy elektro":"vazana","Hostinska cinnost":"vazana","Silnicni nakladni doprava":"koncese","Provadeni staveb":"vazana"
+  };
+  PRETTY = {
+    "Ucetnictvi a danove poradenstvi":"Účetnictví a daňové poradenství","Provoz e-shopu":"Provoz e-shopu","Maloobchod a velkoobchod":"Maloobchod a velkoobchod",
+    "Vyvoj softwaru a IT sluzby":"Vývoj softwaru a IT služby","Marketingove sluzby":"Marketingové služby","Realitni zprostredkovani":"Realitní zprostředkování",
+    "Silnicni nakladni doprava":"Silniční nákladní doprava","Provadeni staveb":"Provádění staveb","Hostinska cinnost":"Hostinská činnost",
+    "Montaz a opravy elektro":"Montáž a opravy elektro","Graficky design":"Grafický design","Poradenstvi v oblasti podnikani":"Poradenství v podnikání"
+  };
+  TRADEID = { volna:"ZIVNOST_VOLNA", vazana:"ZIVNOST_VAZANA", koncese:"ZIVNOST_KONCESE" };
+  ORDER = ["OR_ZAPIS","DPPO","DATOVKA","ZIVNOST_VOLNA","ZIVNOST_VAZANA","ZIVNOST_KONCESE","SIDLO_OZNACENI","SKUTECNI_MAJITELE","PROVOZOVNA","DPH","ZAM_CSSZ","ZAM_ZP"];
+  DPH_THRESHOLD = 2000000;
+  BASELINE = ["DATOVKA","DPPO","OR_ZAPIS","ZIVNOST_VOLNA"];
+  PREDMET_ICON = {
+    "Vyvoj softwaru a IT sluzby":"database","Provoz e-shopu":"store","Maloobchod a velkoobchod":"store","Marketingove sluzby":"trending-up",
+    "Graficky design":"file-check","Poradenstvi v oblasti podnikani":"users","Ucetnictvi a danove poradenstvi":"landmark","Realitni zprostredkovani":"building",
+    "Montaz a opravy elektro":"shield-check","Hostinska cinnost":"store","Silnicni nakladni doprava":"trending-up","Provadeni staveb":"building"
+  };
+
+  questions() {
+    return [
+      {key:"predmet", eyebrow:"Krok 1 · Čím se firma zabývá", title:"Co bude vaše firma dělat?", sub:"Podle hlavní činnosti určíme typ živnosti — volnou, vázanou nebo koncesovanou.", cols:2, icons:true,
+        customLabel:"Jiný obor — napíšu vlastní", customPlaceholder:"Např. Půjčovna sportovního vybavení", customType:"text",
+        options: Object.keys(this.ZIV).map(k => ({label:this.PRETTY[k]||k, value:k, icon:this.PREDMET_ICON[k]||"scale"}))},
+      {key:"obec", eyebrow:"Krok 2 · Sídlo", title:"Kde bude firma sídlit?", sub:"Adresu sídla dohledáme v RÚIAN — stačí město.", cols:3, icons:false,
+        customLabel:"Jiné město", customPlaceholder:"Např. Hradec Králové", customType:"text",
+        options:["Praha","Brno","Ostrava","Plzeň","Olomouc","Liberec"].map(c => ({label:c, value:c}))},
+      {key:"obrat", eyebrow:"Krok 3 · Obrat", title:"Jaký očekáváte obrat v prvním roce?", sub:"Při překročení 2 000 000 Kč vzniká povinnost registrace k DPH — agent ji pohlídá.", cols:2, icons:false,
+        customLabel:"Zadám přesnou částku", customPlaceholder:"Např. 2 600 000", customType:"money",
+        options:[{label:"Do 500 000 Kč",value:400000},{label:"500 000 – 2 mil. Kč",value:1300000},{label:"2 – 5 mil. Kč",value:3500000},{label:"Nad 5 mil. Kč",value:7000000}]},
+      {key:"zamestnanci", eyebrow:"Krok 4 · Lidé", title:"Plánujete v prvním roce zaměstnance?", sub:"Už první zaměstnanec spustí registrace u ČSSZ a zdravotní pojišťovny.", cols:2, icons:false,
+        customLabel:"Zadám přesný počet", customPlaceholder:"Např. 3", customType:"int",
+        options:[{label:"Zatím ne",value:0},{label:"1 zaměstnanec",value:1},{label:"2–5 zaměstnanců",value:3},{label:"Více než 5",value:8}]},
+      {key:"provozovna", eyebrow:"Krok 5 · Provozovna", title:"Budete mít provozovnu?", sub:"Provozovna je místo podnikání jiné než sídlo — prodejna, dílna, kancelář pro veřejnost. Hlásí se zvlášť.", cols:2, icons:false, noCustom:true,
+        options:[{label:"Ano, budu mít provozovnu",value:true},{label:"Ne, stačí mi sídlo",value:false}]},
+      {key:"owners", eyebrow:"Krok 6 · Vlastníci", title:"Kdo bude firmu vlastnit?", sub:"Společníky z řad firem (PO) ověříme v ARES. Evidence skutečných majitelů platí vždy.", cols:1, icons:false, noCustom:true,
+        options:[{label:"Jen já (jedna osoba)",value:"me"},{label:"Více fyzických osob",value:"multi"},{label:"Zapojí se i firma (s.r.o. jako společník)",value:"po"}]}
+    ];
+  }
+
+  // ───────── icons ─────────
+  ic(name){
+    const S={
+      "arrow-right":[["path","M5 12h14"],["path","m13 6 6 6-6 6"]],
+      "arrow-left":[["path","M19 12H5"],["path","m11 18-6-6 6-6"]],
+      "check":[["path","M20 6 9 17l-5-5"]],
+      "plus":[["path","M12 5v14"],["path","M5 12h14"]],
+      "x":[["path","M18 6 6 18"],["path","M6 6l12 12"]],
+      "chevron":[["path","m6 9 6 6 6-6"]],
+      "edit":[["path","M12 20h9"],["path","M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"]],
+      "send":[["path","M22 2 11 13"],["path","M22 2 15 22l-4-9-9-4Z"]],
+      "building":[["path","M3 21h18"],["path","M5 21V6l7-3 7 3v15"],["path","M9 21v-4h6v4"],["path","M8.5 9h.01"],["path","M12 9h.01"],["path","M15.5 9h.01"],["path","M8.5 13h.01"],["path","M12 13h.01"]],
+      "map-pin":[["path","M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"],["circle","12","10","3"]],
+      "users":[["path","M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"],["circle","9","7","4"],["path","M22 21v-2a4 4 0 0 0-3-3.87"],["path","M16 3.13a4 4 0 0 1 0 7.75"]],
+      "user-plus":[["path","M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"],["circle","9","7","4"],["path","M19 8v6"],["path","M22 11h-6"]],
+      "banknote":[["rect","2","6","20","12","2"],["circle","12","12","2.5"],["path","M6 12h.01"],["path","M18 12h.01"]],
+      "trending-up":[["path","M16 7h6v6"],["path","m22 7-8.5 8.5-5-5L2 17"]],
+      "landmark":[["path","M3 22h18"],["path","M6 18v-7"],["path","M10 18v-7"],["path","M14 18v-7"],["path","M18 18v-7"],["path","m2 9 10-6 10 6"],["path","M2 11h20"]],
+      "shield-check":[["path","M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"],["path","m9 12 2 2 4-4"]],
+      "file-check":[["path","M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2Z"],["path","M14 2v6h6"],["path","m9 15 2 2 4-4"]],
+      "calendar":[["path","M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"],["path","M16 2v4"],["path","M8 2v4"],["path","M3 10h18"],["circle","18","18","3.5"],["path","M18 16.5V18l1 1"]],
+      "clock":[["circle","12","12","9"],["path","M12 7v5l3 2"]],
+      "database":[["ellipse","12","5","9","3"],["path","M3 5v6c0 1.66 4 3 9 3s9-1.34 9-3V5"],["path","M3 11v6c0 1.66 4 3 9 3s9-1.34 9-3v-6"]],
+      "search-check":[["path","m8 11 2 2 4-4"],["circle","11","11","8"],["path","m21 21-4.3-4.3"]],
+      "git-branch":[["path","M6 3v12"],["circle","18","6","3"],["circle","6","18","3"],["path","M18 9a9 9 0 0 1-9 9"]],
+      "scale":[["path","M12 3v18"],["path","M5 7h14"],["path","M7 7l-3 7c1.6 1.3 4.4 1.3 6 0z"],["path","M17 7l-3 7c1.6 1.3 4.4 1.3 6 0z"],["path","M7 21h10"]],
+      "alert":[["path","M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"],["path","M12 9v4"],["path","M12 17h.01"]],
+      "store":[["path","M3 9 4.5 4h15L21 9"],["path","M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"],["path","M9 20v-6h6v6"],["path","M3 9h18"]],
+      "circle-check":[["circle","12","12","9"],["path","m8.5 12 2.5 2.5 4.5-5"]],
+      "help":[["circle","12","12","9"],["path","M9.5 9a2.5 2.5 0 0 1 4.5 1.4c0 1.6-2.5 2-2.5 2.6"],["path","M12 17h.01"]]
+    };
+    const defs=S[name]||[];
+    const ch=defs.map((e,i)=>{const t=e[0];
+      if(t==="circle")return React.createElement("circle",{key:i,cx:e[1],cy:e[2],r:e[3]});
+      if(t==="ellipse")return React.createElement("ellipse",{key:i,cx:e[1],cy:e[2],rx:e[3],ry:e[4]});
+      if(t==="rect")return React.createElement("rect",{key:i,x:e[1],y:e[2],width:e[3],height:e[4],rx:e[5]});
+      return React.createElement("path",{key:i,d:e[1]});});
+    return React.createElement("svg",{width:"1em",height:"1em",viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:1.75,strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":true,style:{display:"block",flex:"none"}},ch);
+  }
+  brand(){
+    return React.createElement("svg",{width:"1em",height:"1em",viewBox:"0 0 24 24",fill:"none","aria-hidden":true,style:{display:"block"}},
+      React.createElement("circle",{cx:12,cy:12,r:8,stroke:"currentColor",strokeWidth:1.6,opacity:.55}),
+      React.createElement("circle",{cx:18.5,cy:7,r:2.4,fill:"currentColor"}),
+      React.createElement("circle",{cx:12,cy:12,r:2,fill:"currentColor"}));
+  }
+
+  // ───────── helpers ─────────
+  money(n){ return new Intl.NumberFormat("cs-CZ").format(Math.round(n)) + " Kč"; }
+  pretty(p){ return this.PRETTY[p] || p; }
+  tradeId(p){ return this.TRADEID[this.ZIV[p] || "volna"]; }
+
+  firm(){
+    const a = this.state.answers;
+    const ownersMap = {
+      me:[{typ:"FO",statni_prislusnost:"CZ"}],
+      multi:[{typ:"FO",statni_prislusnost:"CZ"},{typ:"FO",statni_prislusnost:"CZ"}],
+      po:[{typ:"PO",nazev:"Holding Partners s.r.o.",ico:"24681012"},{typ:"FO",statni_prislusnost:"CZ"}]
+    };
+    return {
+      forma:"s.r.o.", predmet:a.predmet || "Vyvoj softwaru a IT sluzby",
+      sidlo:{adresa:a.obec || "Praha"},
+      spolecnici: ownersMap[a.owners] || ownersMap.me,
+      predpokladany_obrat_rok: typeof a.obrat === "number" ? a.obrat : 0,
+      plan_zamestnancu: typeof a.zamestnanci === "number" ? a.zamestnanci : 0,
+      provozovna: a.provozovna ? {adresa:"Provozovna, " + (a.obec || "")} : null
+    };
+  }
+
+  evaluate(firm){
+    const ids = new Set(["OR_ZAPIS","DPPO","DATOVKA","SIDLO_OZNACENI","SKUTECNI_MAJITELE"]);
+    ids.add(this.tradeId(firm.predmet));
+    if (firm.provozovna) ids.add("PROVOZOVNA");
+    if (firm.plan_zamestnancu > 0){ ids.add("ZAM_CSSZ"); ids.add("ZAM_ZP"); }
+    if (firm.predpokladany_obrat_rok > this.DPH_THRESHOLD) ids.add("DPH");
+    return this.ORDER.filter(id => ids.has(id));
+  }
+  state2(id){ return (id === "DPH" || id === "ZAM_CSSZ" || id === "ZAM_ZP") ? "later" : "now"; }
+  why(id, firm){
+    const m = {
+      OR_ZAPIS:firm.forma+" vzniká zápisem do obchodního rejstříku.",
+      DPPO:"Právnická osoba se registruje k dani z příjmů.",
+      DATOVKA:"S.r.o. má datovou schránku zřízenou automaticky.",
+      SIDLO_OZNACENI:"Sídlo na adrese "+firm.sidlo.adresa+" musí být viditelně označené.",
+      SKUTECNI_MAJITELE:"Evidence skutečných majitelů se týká každé s.r.o.",
+      ZIVNOST_VOLNA:this.pretty(firm.predmet)+" je vedeno jako volná živnost.",
+      ZIVNOST_VAZANA:this.pretty(firm.predmet)+" je vázaná živnost — nutná odborná způsobilost.",
+      ZIVNOST_KONCESE:this.pretty(firm.predmet)+" vyžaduje státní koncesi.",
+      PROVOZOVNA:"Firma uvádí provozovnu — je třeba ji ohlásit.",
+      DPH:"Obrat "+this.money(firm.predpokladany_obrat_rok)+" překročí prah 2 000 000 Kč.",
+      ZAM_CSSZ:"Firma plánuje "+firm.plan_zamestnancu+" zaměstnance — vzniká povinnost vůči ČSSZ.",
+      ZAM_ZP:"Při prvním zaměstnanci se firma hlásí i zdravotní pojišťovně."
+    };
+    return m[id] || "";
+  }
+  dphMonth(firm){
+    if (firm.predpokladany_obrat_rok <= this.DPH_THRESHOLD) return null;
+    const monthly = firm.predpokladany_obrat_rok / 12;
+    return Math.max(2, Math.min(11, Math.ceil(this.DPH_THRESHOLD / monthly)));
+  }
+  dueText(id, firm){
+    if (id === "DPH") return "≈ měsíc " + (this.dphMonth(firm) || "?");
+    if (id === "ZAM_CSSZ" || id === "ZAM_ZP") return "Před nástupem zaměstnance";
+    return "Při založení";
+  }
+  monthIndex(id, firm){
+    if (id === "ZAM_CSSZ" || id === "ZAM_ZP") return 2;
+    if (id === "DPH") return this.dphMonth(firm) || 6;
+    return 0;
+  }
+  toneColor(s){ return s === "now" ? "var(--green-500)" : "var(--amber-500)"; }
+
+  axisStations(firm, now, later, baseSet){
+    const hiddenNow = now.filter(id => !baseSet.has(id)).map(id => this.KAT[id]);
+    const stations = [];
+    // one node per obligation, ordered: day-0 obligations first, then later ones by month
+    const ordered = now.map(id => ({id, m:0}))
+      .concat(later.map(id => ({id, m: this.monthIndex(id, firm)})))
+      .sort((a,b) => a.m - b.m);
+    ordered.forEach(({id, m}) => {
+      stations.push({
+        key:id, m,
+        date: this.dueText(id, firm),
+        title: this.KAT[id],
+        sub: this.AUTH[id],
+        tone: m === 0 ? "now" : "upcoming",
+        hidden: !baseSet.has(id),
+        icon: this.ICN[id]
+      });
+    });
+    stations.push({key:"end", m:12, date:"Měsíc 12", title:"Konec 1. roku", sub:"kontrola a příprava 2. roku", tone:"checkpoint"});
+
+    // growth advice — extra nodes OFF the main line, on a few well-spaced columns
+    const advice = [
+      {title:"Nastavit účetnictví a firemní účet"},
+      {title:"Spustit web a firemní e-mail"},
+      {title:"Zavést mzdovou a fakturační agendu"},
+      {title:"Připravit plán expanze na 2. rok"}
+    ];
+    const last = stations.length - 1;
+    const slots = [0, Math.round(last*0.4), Math.round(last*0.7), last].filter((v,i,a) => a.indexOf(v) === i);
+    slots.forEach((idx, k) => { if (stations[idx] && advice[k]) stations[idx].growth = advice[k]; });
+    return stations;
+  }
+  buildAxis(firm, now, later, baseSet, doneMap, onToggle){
+    const A = (n) => this.ic(n);
+    doneMap = doneMap || {};
+    const stations = this.axisStations(firm, now, later, baseSet);
+    const N = stations.length;
+    let doneReach = -1;
+    stations.forEach((s,i) => { if (doneMap[s.key]) doneReach = i; });
+    const seg = (green, edge) => React.createElement("span",{style:{flex:1,height:4,borderRadius:99,background: edge ? "transparent" : (green ? "var(--green-500)" : "var(--border-default)")}});
+    const circle = (s) => {
+      if (doneMap[s.key]) return React.createElement("span",{style:{width:40,height:40,flex:"none",borderRadius:"50%",background:"var(--green-500)",color:"#fff",display:"grid",placeItems:"center",fontSize:18,boxShadow:"0 2px 7px rgba(24,153,106,.35)",zIndex:1}}, A("check"));
+      if (s.tone === "now") return React.createElement("span",{style:{width:40,height:40,flex:"none",borderRadius:"50%",background:"#fff",border:"2px solid var(--accent)",display:"grid",placeItems:"center",zIndex:1}}, React.createElement("span",{style:{width:9,height:9,borderRadius:"50%",background:"var(--accent)"}}));
+      if (s.tone === "upcoming") return React.createElement("span",{style:{width:40,height:40,flex:"none",borderRadius:"50%",background:"#fff",border:"2px solid var(--amber-500)",color:"var(--amber-700)",display:"grid",placeItems:"center",fontSize:16,zIndex:1}}, A("clock"));
+      return React.createElement("span",{style:{width:40,height:40,flex:"none",borderRadius:"50%",background:"#fff",border:"2px solid var(--border-strong)",display:"grid",placeItems:"center",zIndex:1}}, React.createElement("span",{style:{width:7,height:7,borderRadius:"50%",background:"var(--border-strong)"}}));
+    };
+    const growthZone = (s) => React.createElement("div",{style:{height:112,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end"}},
+      s.growth ? React.createElement("div",{style:{display:"flex",flexDirection:"column",alignItems:"center"}},
+        React.createElement("div",{style:{background:"#fff",border:"1px dashed var(--accent)",borderRadius:9,padding:"7px 11px",maxWidth:168,textAlign:"center",boxShadow:"var(--shadow-xs)"}},
+          React.createElement("div",{style:{fontSize:9,fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--accent)",marginBottom:3}}, "Doporučení pro růst"),
+          React.createElement("div",{style:{fontSize:11.5,fontWeight:600,color:"var(--text-strong)",lineHeight:1.25}}, s.growth.title)),
+        React.createElement("span",{style:{width:28,height:28,borderRadius:"50%",background:"var(--accent-tint)",border:"1.5px dashed var(--accent)",color:"var(--accent)",display:"grid",placeItems:"center",fontSize:14,marginTop:7}}, A("trending-up")),
+        React.createElement("span",{style:{width:2,height:16,background:"var(--accent)",opacity:.45}})) : null);
+
+    // ── phases: when to do these nodes ──
+    const phaseOf = (s) => s.key==="end"
+      ? {key:"close",label:"Konec roku",sub:"kontrola a další rok",color:"var(--text-subtle)"}
+      : (s.m===0 ? {key:"start",label:"Při založení",sub:"vyřiďte hned po vzniku firmy",color:"var(--accent)"}
+                 : {key:"during",label:"Během prvního roku",sub:"spouští je růst — agent hlídá termín",color:"var(--amber-700)"});
+    const phaseSeq = stations.map(phaseOf);
+    const groups = [];
+    phaseSeq.forEach((p) => { const g = groups[groups.length-1]; if (g && g.key===p.key) g.count++; else groups.push(Object.assign({}, p, {count:1})); });
+    const phaseHeader = React.createElement("div",{style:{display:"flex",width:"100%",marginBottom:18}},
+      groups.map((g,gi) => React.createElement("div",{key:gi,style:{flex:g.count,minWidth:g.count*166,paddingLeft: gi>0?15:0,borderLeft: gi>0?"1px dashed var(--border-strong)":"none"}},
+        React.createElement("div",{style:{display:"inline-flex",alignItems:"center",gap:7}},
+          React.createElement("span",{style:{width:9,height:9,borderRadius:"50%",background:g.color,flex:"none"}}),
+          React.createElement("span",{style:{fontSize:13,fontWeight:700,color:"var(--text-strong)",letterSpacing:"-.01em",whiteSpace:"nowrap"}}, g.label)),
+        React.createElement("div",{style:{fontSize:11,color:"var(--text-muted)",marginTop:2,paddingLeft:16}}, g.sub))));
+
+    const cols = stations.map((s,i) => {
+      const done = !!doneMap[s.key];
+      const toggle = (e) => { if (e && e.stopPropagation) e.stopPropagation(); onToggle(s.key); };
+      const dateColor = s.tone==="now"?"var(--accent)":(s.tone==="upcoming"?"var(--amber-700)":"var(--text-subtle)");
+      const showDate = phaseSeq[i].key==="during" && (i===0 || s.date !== stations[i-1].date);
+      const newPhase = i>0 && phaseSeq[i].key !== phaseSeq[i-1].key;
+      return React.createElement("div",{key:i,style:{flex:"1 1 0",minWidth:166,display:"flex",flexDirection:"column",alignItems:"center",borderLeft: newPhase?"1px dashed var(--border-strong)":"none",paddingLeft: newPhase?15:0}},
+        growthZone(s),
+        React.createElement("div",{style:{height:18,marginBottom:8,fontSize:12,fontWeight:600,whiteSpace:"nowrap",color:dateColor}}, showDate ? s.date : ""),
+        React.createElement("div",{style:{display:"flex",alignItems:"center",width:"100%"}},
+          seg(i>0 && i<=doneReach, i===0 || newPhase),
+          React.createElement("button",{onClick:toggle,title:done?"Označit jako nehotové":"Označit jako hotové",style:{background:"none",border:"none",padding:0,cursor:"pointer",display:"grid",placeItems:"center"}}, circle(s)),
+          seg(i<doneReach, i===N-1)),
+        React.createElement("div",{style:{marginTop:11,textAlign:"center",padding:"0 6px"}},
+          React.createElement("div",{style:{fontSize:13.5,fontWeight:600,color:"var(--text-strong)",lineHeight:1.25}}, s.title),
+          React.createElement("div",{style:{fontSize:11.5,color:"var(--text-muted)",marginTop:3,lineHeight:1.35}}, s.sub)),
+        React.createElement("button",{onClick:toggle,style:{marginTop:8,display:"inline-flex",alignItems:"center",gap:5,background: done?"var(--green-50)":"transparent",border:"1px solid "+(done?"var(--green-100)":"var(--border-default)"),borderRadius:99,padding:"4px 10px",cursor:"pointer",fontFamily:"var(--font-body)",fontSize:11,fontWeight:600,color: done?"var(--green-700)":"var(--text-subtle)"}},
+          done ? A("check") : null, done ? "Hotovo" : "Označit hotové"),
+        s.hidden ? React.createElement("div",{style:{marginTop:10,display:"inline-flex",alignItems:"center",gap:5,background:"var(--signal-50)",border:"1px solid var(--signal-100)",borderRadius:99,padding:"3px 10px"}},
+          React.createElement("span",{style:{color:"var(--accent)",fontSize:12,display:"grid",placeItems:"center"}}, A("search-check")),
+          React.createElement("span",{style:{fontSize:10.5,fontWeight:700,letterSpacing:".03em",textTransform:"uppercase",color:"var(--accent)"}}, "Skrytá")) : null
+      );
+    });
+    return React.createElement("div",{style:{display:"flex",flexDirection:"column",width:"100%",minWidth: Math.max(720, N*166)}},
+      phaseHeader,
+      React.createElement("div",{style:{display:"flex",alignItems:"flex-start",width:"100%"}}, cols));
+  }
+
+  scrollBottom(){
+    requestAnimationFrame(() => setTimeout(() => {
+      try { const el = document.getElementById("yo-chat"); if (el){ el.scrollTo({top: el.scrollHeight, behavior:"smooth"}); return; } window.scrollTo({top: document.documentElement.scrollHeight, behavior:"smooth"}); } catch(e){}
+    }, 70));
+  }
+
+  // ───────── wizard actions ─────────
+  selectOpt(key, value, label){
+    const answers = Object.assign({}, this.state.answers, {[key]: value});
+    const labels = Object.assign({}, this.state.labels, {[key]: label});
+    this.setState({answers, labels, customOpen:false, customVal:""});
+  }
+  goNext(){
+    const qs = this.questions(), i = this.state.step, q = qs[i];
+    let answers = this.state.answers, labels = this.state.labels;
+    if (answers[q.key] == null){ const o = q.options[0]; answers = Object.assign({}, answers, {[q.key]:o.value}); labels = Object.assign({}, labels, {[q.key]:o.label}); }
+    if (i >= qs.length - 1){ this.setState({answers, labels}, () => this.build()); }
+    else this.setState({answers, labels, step:i+1, customOpen:false, customVal:""});
+  }
+  openCustom(){ this.setState({customOpen:true, customVal:""}); }
+  onCustomInput(e){ this.setState({customVal:e.target.value}); }
+  confirmCustom(){
+    const q = this.questions()[this.state.step];
+    const raw = (this.state.customVal || "").trim();
+    if (!raw) return;
+    let value = raw, label = raw;
+    if (q.customType === "money"){ const n = parseInt(raw.replace(/\D/g,""),10); if(!n) return; value = n; label = this.money(n); }
+    else if (q.customType === "int"){ const n = parseInt(raw.replace(/\D/g,""),10); value = isNaN(n)?0:n; label = value===0?"Bez zaměstnanců":(value+" zaměstnanců"); }
+    this.selectOpt(q.key, value, label);
+  }
+  onCustomKey(e){ if (e.key === "Enter"){ e.preventDefault(); this.confirmCustom(); } }
+  back(){ if (this.state.step > 0) this.setState({step:this.state.step - 1, customOpen:false}); }
+  goStep(i){ this.setState({step:i, customOpen:false}); }
+  goHome(){ this._clear(); this.setState({screen:"canvas", step:0, answers:{}, labels:{}, customOpen:false, customVal:"", scenario:null, doneSteps:{}, showAudit:false}); }
+
+  build(){
+    this._clear();
+    const phases = 7;
+    this.setState({screen:"running", genIndex:0});
+    const speed = {"klidné":620,"svižné":380,"okamžité":110}[this.props.pipelineSpeed || "svižné"] || 380;
+    const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced){ this.setState({screen:"plan"}); return; }
+    let i = 0;
+    const tick = () => {
+      i++; this.setState({genIndex:i});
+      if (i < phases - 1) this._t = setTimeout(tick, speed);
+      else this._t = setTimeout(() => this.setState({screen:"plan"}), speed + 250);
+    };
+    this._t = setTimeout(tick, speed);
+  }
+  _clear(){ if (this._t){ clearTimeout(this._t); this._t = null; } if (this._ct){ clearTimeout(this._ct); this._ct = null; } }
+  componentWillUnmount(){ this._clear(); }
+  toggleStep(key){ const d = Object.assign({}, this.state.doneSteps || {}); d[key] = !d[key]; this.setState({doneSteps:d}); }
+  toggleAudit(){ this.setState({showAudit:!this.state.showAudit}); }
+  toggleWhatif(){ this.setState({whatifOpen:!this.state.whatifOpen}); }
+  toggleChat(){ this.setState({chatOpen:!this.state.chatOpen, whatifOpen:false}); }
+
+  // ───────── what-if ─────────
+  applyScenario(firm, ev){
+    const f = JSON.parse(JSON.stringify(firm));
+    if (ev.type === "increase_turnover") f.predpokladany_obrat_rok = ev.turnover;
+    else if (ev.type === "employee_start") f.plan_zamestnancu = Math.max(1, f.plan_zamestnancu);
+    else if (ev.type === "open_branch") f.provozovna = {adresa: ev.address || "Nová provozovna"};
+    else if (ev.type === "change_subject" || ev.type === "add_regulated_trade") f.predmet = ev.subject;
+    else if (ev.type === "add_partner") f.spolecnici = f.spolecnici.concat([{typ:"FO",statni_prislusnost:"CZ"}]);
+    return f;
+  }
+  scenarioQuestions(type){
+    const q = {
+      employee_start:["Od kdy přesně zaměstnanec nastoupí?","Půjde o HPP, nebo DPP/DPČ?"],
+      increase_turnover:["Kdy očekáváte překročení 2 mil. Kč?","Chcete se k DPH přihlásit dobrovolně dříve?"],
+      open_branch:["Jaká je přesná adresa provozovny?","Bude tam docházet veřejnost?"],
+      add_regulated_trade:["Máte odpovědného zástupce s odbornou způsobilostí?","Doložíte praxi nebo vzdělání?"],
+      add_partner:["Je nový společník fyzická, nebo právnická osoba?","Mění se podíly a jednatelství?"],
+      change_subject:["Je nový obor volná, nebo regulovaná živnost?","Ukončíte původní činnost?"]
+    };
+    return q[type] || ["Je potřeba doplnit další údaje?"];
+  }
+
+  // ── conversation helpers ──
+  _nid(){ this._midc = (this._midc || 0) + 1; return "m" + this._midc; }
+  _clearCt(){ if (this._ct){ clearTimeout(this._ct); this._ct = null; } }
+  today(){ return new Date(); }
+  toInput(d){ const m=("0"+(d.getMonth()+1)).slice(-2), day=("0"+d.getDate()).slice(-2); return d.getFullYear()+"-"+m+"-"+day; }
+  todayStr(){ return this.toInput(new Date()); }
+  parseDate(s){ if(!s) return null; const p=String(s).split("-"); if(p.length!==3) return null; const d=new Date(+p[0], +p[1]-1, +p[2]); return isNaN(d.getTime())?null:d; }
+  addDays(d,n){ const x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+  endOfMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0); }
+  fmtDate(d){ return d.getDate()+". "+(d.getMonth()+1)+". "+d.getFullYear(); }
+  pluralPovin(n){ return n===1?"povinnost":(n>=2&&n<=4?"povinnosti":"povinností"); }
+
+  clarifyConfig(ev){
+    const c = {
+      employee_start:{intro:"Rozumím — do firmy přidáváte prvního zaměstnance. Než spočítám termíny, potřebuju upřesnit:", q:["Půjde o hlavní pracovní poměr (HPP), nebo DPP/DPČ?"], date:"Od kdy zaměstnanec nastoupí?"},
+      increase_turnover:{intro:"Jasně — počítáte s překročením obratu 2 mil. Kč, takže přijde na řadu DPH. Doplňte mi termín:", q:["Chcete se k DPH přihlásit dobrovolně dříve?"], date:"Kdy očekáváte překročení limitu?"},
+      open_branch:{intro:"Dobře — otevíráte novou provozovnu. Potřebuju vědět, odkdy ji počítat:", q:["Bude do provozovny docházet veřejnost?"], date:"Od kdy bude provozovna v provozu?"},
+      add_partner:{intro:"Rozumím — do firmy přibývá další společník. Doplňte mi datum účinnosti:", q:["Je nový společník fyzická, nebo právnická osoba?"], date:"Od kdy má změna platit?"},
+      change_subject:{intro:"Dobře — měníte předmět podnikání. Kdy novou činnost spustíte?", q:["Je nový obor volná, nebo regulovaná živnost?"], date:"Od kdy chcete začít?"},
+      add_regulated_trade:{intro:"Rozumím — přidáváte regulovanou živnost. Doplňte mi termín:", q:["Máte odpovědného zástupce s odbornou způsobilostí?"], date:"Od kdy chcete činnost provozovat?"}
+    };
+    return c[ev.type] || {intro:"Rozumím. Doplňte mi prosím termín:", q:[], date:"Od kdy to platí?"};
+  }
+  deadlinesFor(ev, base){
+    const D = (n) => this.fmtDate(this.addDays(base, n));
+    switch(ev.type){
+      case "employee_start": return [
+        {label:"Přihláška zaměstnavatele na ČSSZ", meta:"do 8 dnů od nástupu → do "+D(8)},
+        {label:"Přihlášení zaměstnance ke zdravotní pojišťovně", meta:"do 8 dnů → do "+D(8)},
+        {label:"Zákonné pojištění odpovědnosti zaměstnavatele", meta:"do konce čtvrtletí nástupu"}
+      ];
+      case "increase_turnover": { const reg = this.addDays(this.endOfMonth(base), 15); return [
+        {label:"Registrace k DPH na finanční úřad", meta:"do 15 dnů po měsíci překročení → do "+this.fmtDate(reg)},
+        {label:"První přiznání a kontrolní hlášení k DPH", meta:"za měsíc registrace"}
+      ]; }
+      case "open_branch": return [
+        {label:"Ohlášení provozovny živnostenskému úřadu", meta:"nejpozději v den zahájení → "+this.fmtDate(base)},
+        {label:"Označení provozovny údaji podnikatele", meta:"k datu otevření"}
+      ];
+      case "add_partner": return [
+        {label:"Návrh na zápis změny do obchodního rejstříku", meta:"bez zbytečného odkladu po rozhodnutí"},
+        {label:"Úprava společenské smlouvy u notáře", meta:"před podáním návrhu"}
+      ];
+      case "change_subject":
+      case "add_regulated_trade": return [
+        {label:"Ohlášení živnosti živnostenskému úřadu", meta:"před zahájením činnosti → "+this.fmtDate(base)},
+        {label:"Doložení odborné způsobilosti / odpovědného zástupce", meta:"k ohlášení"}
+      ];
+      default: return [{label:"Aktualizace povinností v plánu", meta:""}];
+    }
+  }
+
+  runScenario(ev){
+    const id = this._nid();
+    this.setState(s => ({
+      whatifOpen:false, freeText:"",
+      thread: (s.thread||[]).concat([{id, role:"user", text:ev.text}]),
+      thinking:true, thinkingLabel:"YearOne čte scénář…"
+    }), () => this.scrollBottom());
+    this._clearCt();
+    this._ct = setTimeout(() => this._postClarify(ev), 850);
+  }
+  _postClarify(ev){
+    const cfg = this.clarifyConfig(ev);
+    const id = this._nid();
+    const lines = (cfg.q||[]).map(q => ({icon:this.ic("help"), label:q, meta:"", hasMeta:false}));
+    this.setState(s => ({
+      thinking:false, activeId:id, clarifyDate: s.clarifyDate || this.todayStr(),
+      thread: (s.thread||[]).concat([{id, role:"agent", kind:"clarify", ev, tag:"UPŘESNĚNÍ", intro:cfg.intro, lines, dateLabel:cfg.date}])
+    }), () => this.scrollBottom());
+  }
+  _answer(ev){
+    const dstr = this.fmtDate(this.parseDate(this.state.clarifyDate) || this.today());
+    this.setState(s => ({
+      activeId:null,
+      thread: (s.thread||[]).concat([{id:this._nid(), role:"user", text:"Od "+dstr}]),
+      thinking:true, thinkingLabel:"Počítám dopad na plán…"
+    }), () => this.scrollBottom());
+    this._clearCt();
+    this._ct = setTimeout(() => this._postAnswer(ev), 1000);
+  }
+  _postAnswer(ev){
+    const base = this.parseDate(this.state.clarifyDate) || this.today();
+    const dls = this.deadlinesFor(ev, base);
+    const before = this.evaluate(this.firm());
+    const after = this.evaluate(this.applyScenario(this.firm(), ev));
+    const as = new Set(after);
+    const removed = before.filter(id => !as.has(id));
+    const n = dls.length;
+    const intro = n > 0
+      ? "Spočítáno. Když to nastane k " + this.fmtDate(base) + ", přibydou do plánu " + n + " " + this.pluralPovin(n) + " s konkrétními termíny:"
+      : "Spočítáno k " + this.fmtDate(base) + ". Tahle změna nepřidává žádné nové zákonné povinnosti — termíny v plánu zůstávají.";
+    const lines = dls.map(d => ({icon:this.ic("calendar"), label:d.label, meta:d.meta, hasMeta:!!d.meta}));
+    const id = this._nid();
+    const msg = {id, role:"agent", kind:"answer", ev, tag:"PLÁN ZMĚN", intro, lines};
+    if (removed.length){ msg.outro = true; msg.outroText = "Naopak odpadá: " + removed.map(x => this.KAT[x] || x).join(", ") + "."; }
+    this.setState(s => ({ thinking:false, activeId:id, thread:(s.thread||[]).concat([msg]) }), () => this.scrollBottom());
+  }
+  _commit(ev){
+    const cid = this._nid();
+    this.setState(s => ({
+      activeId:null, commitPhase:"Zapisuji změny do plánu…", commitPct:"14%",
+      thread: (s.thread||[]).concat([{id:cid, role:"agent", kind:"committing"}])
+    }), () => this.scrollBottom());
+    this._clearCt();
+    const seq = [["Ověřuji povinnosti v registrech…","46%"],["Aktualizuji termíny v timeline…","76%"],["Dokončuji…","100%"]];
+    let i = 0;
+    const step = () => {
+      const s = seq[i]; this.setState({commitPhase:s[0], commitPct:s[1]}); i++;
+      if (i < seq.length) this._ct = setTimeout(step, 620);
+      else this._ct = setTimeout(() => this._finishCommit(cid, ev), 700);
+    };
+    this._ct = setTimeout(step, 560);
+  }
+  _finishCommit(cid, ev){
+    const applied = this.applyScenario(this.firm(), ev);
+    const a = Object.assign({}, this.state.answers);
+    const labels = Object.assign({}, this.state.labels);
+    a.predmet = applied.predmet; a.obrat = applied.predpokladany_obrat_rok; a.zamestnanci = applied.plan_zamestnancu;
+    a.provozovna = !!applied.provozovna;
+    labels.predmet = this.pretty(applied.predmet); labels.obrat = this.money(applied.predpokladany_obrat_rok);
+    labels.zamestnanci = applied.plan_zamestnancu === 0 ? "Bez zaměstnanců" : (applied.plan_zamestnancu + " zaměstnanců");
+    labels.provozovna = applied.provozovna ? "S provozovnou" : "Bez provozovny";
+    this.setState(s => ({
+      answers:a, labels, doneSteps:{},
+      thread: (s.thread||[]).filter(m => m.id !== cid).concat([{id:this._nid(), role:"agent", kind:"done", text:"Hotovo — změna je v plánu a termíny v timeline jsou aktualizované."}])
+    }), () => { window.scrollTo({top:0, behavior:"smooth"}); this.scrollBottom(); });
+  }
+  _cancel(answerId){
+    this.setState(s => ({
+      activeId: s.activeId === answerId ? null : s.activeId,
+      thread: (s.thread||[]).concat([{id:this._nid(), role:"agent", kind:"note", text:"Scénář zrušen — plán zůstává beze změn."}])
+    }), () => this.scrollBottom());
+  }
+  onClarifyDate(e){ this.setState({clarifyDate:e.target.value}); }
+
+  preset(key){
+    const map = {
+      employee:{type:"employee_start",text:"Přijmu prvního zaměstnance"},
+      dph:{type:"increase_turnover",turnover:3000000,text:"Překročím DPH limit — obrat 3 000 000 Kč"},
+      branch:{type:"open_branch",address:"Provozovna v Brně",text:"Otevřu provozovnu v Brně"},
+      subject:{type:"change_subject",subject:"Provoz e-shopu",text:"Změním obor podnikání na e-shop"},
+      partner:{type:"add_partner",text:"Přidám dalšího společníka"},
+      regulated:{type:"add_regulated_trade",subject:"Realitni zprostredkovani",text:"Přidám realitní zprostředkování"}
+    };
+    this.runScenario(map[key]);
+  }
+  setFree(e){ this.setState({freeText:e.target.value}); }
+  onFreeKey(e){ if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); this.runFree(); } }
+  runFree(){
+    const text = (this.state.freeText || "").trim();
+    if (!text) return;
+    this.runScenario(this.parseFree(text));
+  }
+  parseFree(text){
+    const n = text.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+    if (/(brigadnik|zamestnanec|zamestnance|nastoupi|prijmu|najmu)/.test(n)) return {type:"employee_start",text};
+    if (/(pobock|provozovn|brn|praz|ostrav|plzn|olomou)/.test(n)) return {type:"open_branch",address:"Nová provozovna",text};
+    if (/(realit|hostinsk|doprav|ucetnic|elektro|stav|konces|regulovan)/.test(n)) return {type:"add_regulated_trade",subject:/realit/.test(n)?"Realitni zprostredkovani":(/hostinsk/.test(n)?"Hostinska cinnost":"Ucetnictvi a danove poradenstvi"),text};
+    if (/(obrat|milion|limit|dph)/.test(n)){ const mm = n.match(/(\d+(?:[.,]\d+)?)\s*milion/); const t = mm?Math.round(parseFloat(mm[1].replace(",","."))*1e6):3000000; return {type:"increase_turnover",turnover:t,text}; }
+    if (/(spolecnik|partner|podil)/.test(n)) return {type:"add_partner",text};
+    return {type:"increase_turnover",turnover:3000000,text};
+  }
+
+  // ───────── render ─────────
+  renderVals(){
+    const st = this.state, screen = st.screen;
+    const qs = this.questions(), total = qs.length;
+    const q = qs[Math.min(st.step, total - 1)];
+
+    // progress + recap
+    // progress bar — tick-line (replaces segmented bar)
+    const pf = (st.step + 1) / total, PT = 48, progTicks = [];
+    for (let i = 0; i < PT; i++){
+      const p = i / (PT - 1), on = p <= pf + 1e-6, near = Math.abs(p - pf) < (0.5 / total);
+      progTicks.push(React.createElement("span",{key:i,style:{flex:"none",width:2,borderRadius:2,height: near?20:(on?15:11),background: on?"var(--accent)":"var(--border-strong)",opacity: on?1:0.5}}));
+    }
+    const progressEl = React.createElement("div",{style:{position:"relative",flex:1}},
+      React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-end",height:22}}, progTicks),
+      React.createElement("span",{style:{position:"absolute",bottom:-11,left:"calc("+(pf*100)+"% - 4px)",width:8,height:8,borderRadius:"50%",background:"var(--accent)",transition:"left .3s cubic-bezier(.22,1,.36,1)"}}));
+    const recap = qs.filter((x, i) => i < st.step && st.labels[x.key] != null).map((x, i) => ({
+      value: st.labels[x.key], onClick: () => this.goStep(qs.findIndex(z => z.key === x.key))
+    }));
+
+    // choices — spectrum picker (photo style)
+    const sel = st.answers[q.key];
+    const effSel = sel != null ? sel : q.options[0].value;
+    const customActive = sel != null && !q.options.some(o => o.value === sel);
+    const pillBase = "padding:9px 18px;border-radius:10px;border:none;cursor:pointer;font-family:var(--font-body);font-size:15px;font-weight:600;transition:all .14s;white-space:nowrap;";
+    const pills = q.options.map(opt => {
+      const isSel = !customActive && opt.value === effSel;
+      return { label: opt.label, onClick: () => this.selectOpt(q.key, opt.value, opt.label),
+        style: pillBase + (isSel ? "background:var(--accent-tint);color:var(--accent);" : "background:transparent;color:var(--text-strong);") };
+    });
+
+    const lastKey = qs[total - 1].key;
+
+    // generating
+    const phaseDefs = [
+      {l:"Čtu váš záměr",t:"get_intent()"},{l:"Dohledávám v ARES a registrech",t:"lookup_registry()"},
+      {l:"Klasifikuji živnost",t:"lookup_registry()"},{l:"Ověřuji legislativu",t:"lookup_legislation()"},
+      {l:"Odvozuji povinnosti",t:"derive()"},{l:"Plánuji budoucí triggery",t:"schedule()"},{l:"Validuji výstup",t:"validate_output()"}
+    ];
+    const gi = Math.min(st.genIndex, phaseDefs.length - 1);
+    const genBarsEl = React.createElement("div",{style:{display:"flex",gap:"6px",width:"100%",maxWidth:"380px"}},
+      phaseDefs.map((p,i)=>React.createElement("span",{key:i,style:{height:"4px",flex:1,borderRadius:"99px",transition:"background .35s",background: i <= st.genIndex ? "var(--accent)" : "var(--border-default)"}})));
+
+    // plan
+    const firm = this.firm();
+    const ids = this.evaluate(firm);
+    const baseSet = new Set(this.BASELINE);
+    const now = ids.filter(id => this.state2(id) === "now");
+    const later = ids.filter(id => this.state2(id) === "later").sort((a,b) => this.monthIndex(a,firm) - this.monthIndex(b,firm));
+    const hidden = ids.filter(id => !baseSet.has(id));
+    const baselineExtra = this.BASELINE.filter(id => ids.indexOf(id) < 0);
+
+    const doneMap = st.doneSteps || {};
+    const timelineAxisEl = this.buildAxis(firm, now, later, baseSet, doneMap, (k)=>this.toggleStep(k));
+    const axisStations = this.axisStations(firm, now, later, baseSet);
+    const stepsDone = axisStations.filter(s => s.key !== "end" && doneMap[s.key]).length;
+    const stepsTotal = axisStations.filter(s => s.key !== "end").length;
+    const tile = (id) => {
+      const hid = !baseSet.has(id);
+      return {
+        id, label:this.KAT[id], authority:this.AUTH[id], why:this.why(id, firm), icon:this.ic(this.ICN[id]),
+        hidden:hid, iconBg: hid?"var(--signal-50)":"var(--surface-card)", iconColor: hid?"var(--accent)":"var(--ink-600)",
+        border: hid?"var(--signal-200)":"var(--border-subtle)"
+      };
+    };
+    const immediate = now.map(tile);
+    const laterCards = later.map((id, i) => Object.assign(tile(id), {due:this.dueText(id, firm), connector: i < later.length - 1}));
+
+    const audit = ids.map(id => ({
+      id, label:this.KAT[id],
+      dataSource: id.startsWith("ZIVNOST") ? "lookup_registry" : (this.state2(id) === "later" ? "záměr + lookup_legislation" : "záměr + katalog"),
+      ruleSource: this.RSRC[id]
+    }));
+
+    const kpis = [
+      {label:"Hned", value:now.length, color:"var(--green-700)"},
+      {label:"Později", value:later.length, color:"var(--amber-700)"},
+      {label:"Skrytých", value:hidden.length, color:"var(--accent)"}
+    ];
+
+    // presets
+    const presetDef = [
+      {key:"employee",title:"Přijmu prvního zaměstnance",desc:"Spustí ČSSZ a zdravotní pojišťovnu"},
+      {key:"dph",title:"Překročím DPH limit",desc:"Obrat nad 2 mil. → registrace k DPH"},
+      {key:"branch",title:"Otevřu provozovnu",desc:"Ohlášení provozovny živn. úřadu"},
+      {key:"subject",title:"Změním obor podnikání",desc:"Přepočet klasifikace živnosti"},
+      {key:"partner",title:"Přidám společníka",desc:"Změna struktury vlastníků"},
+      {key:"regulated",title:"Přidám regulovanou živnost",desc:"Vázaná / koncesovaná živnost"}
+    ];
+    const presets = presetDef.map(p => ({
+      title:p.title, desc:p.desc, arrow:this.ic("arrow-right"), onClick:()=>this.preset(p.key),
+      style:"display:flex;flex-direction:column;text-align:left;padding:15px 16px;border-radius:11px;cursor:pointer;border:1px solid var(--border-default);background:var(--surface-card);box-shadow:var(--shadow-xs);transition:all .14s;"
+    }));
+
+    // chat thread (view mapping)
+    const thread = (st.thread || []).map(m => {
+      const v = {
+        id:m.id,
+        isUser: m.role === "user",
+        text: m.text,
+        isAgent: m.role === "agent" && (m.kind === "clarify" || m.kind === "answer"),
+        tag: m.tag, intro: m.intro,
+        lines: m.lines || [],
+        hasLines: !!(m.lines && m.lines.length),
+        outro: !!m.outro, outroText: m.outroText,
+        dateLabel: m.dateLabel,
+        isClarify: m.kind === "clarify" && m.id === st.activeId,
+        isAnswer:  m.kind === "answer"  && m.id === st.activeId,
+        isCommitting: m.kind === "committing",
+        isDone: m.kind === "done",
+        isNote: m.kind === "note"
+      };
+      if (v.isClarify) v.onContinue = () => this._answer(m.ev);
+      if (v.isAnswer){ v.onAdd = () => this._commit(m.ev); v.onCancel = () => this._cancel(m.id); }
+      if (v.isCommitting){ v.commitPhase = st.commitPhase; v.commitPct = st.commitPct; }
+      return v;
+    });
+
+    const phaseTag = screen==="canvas" ? "guidance canvas" : (screen==="running" ? "agent · běží" : "plán připraven");
+
+    return Object.assign({
+      brandMark:this.brand(), phaseTag,
+      iconCheck:this.ic("check"), iconArrow:this.ic("arrow-right"), iconArrowLeft:this.ic("arrow-left"),
+      iconEdit:this.ic("edit"), iconSend:this.ic("send"), iconX:this.ic("x"), iconPlus:this.ic("plus"),
+      iconChevron:this.ic("chevron"), iconCalendar:this.ic("calendar"), iconAlert:this.ic("alert"),
+      iconClock:this.ic("clock"), iconGitBranch:this.ic("git-branch"), iconHelp:this.ic("help"),
+      iconSearchCheckSm:this.ic("search-check"), iconDb:this.ic("database"), iconScaleSm:this.ic("scale"),
+      iconCircleCheck:this.ic("circle-check"), approveIcon:this.ic(st.approved?"circle-check":"shield-check"),
+      goHome:()=>this.goHome(),
+      isCanvas:screen==="canvas", isRunning:screen==="running", isPlan:screen==="plan",
+
+      // wizard
+      progressEl, stepLabel:"Krok "+(st.step+1)+" ze "+total,
+      hasRecap:recap.length>0, recap,
+      qEyebrow:q.eyebrow, qTitle:q.title, qSub:q.sub, pills,
+      hasCustom: !q.noCustom, customClosed:!st.customOpen && !q.noCustom, customIsOpen:st.customOpen && !q.noCustom,
+      customActive, customActiveLabel: customActive ? (st.labels[q.key] || "Vlastní") : "",
+      customPillLabel: customActive ? (st.labels[q.key] || "Vlastní") : (q.customLabel || "Vlastní"),
+      customLabel:q.customLabel || "", customPlaceholder:q.customPlaceholder || "", customVal:st.customVal,
+      openCustom:()=>this.openCustom(), onCustomInput:(e)=>this.onCustomInput(e), onCustomKey:(e)=>this.onCustomKey(e), confirmCustom:()=>this.confirmCustom(),
+      canBack:st.step>0, isLast:st.step===total-1, nextLabel: st.step===total-1 ? "Sestavit plán" : "Další",
+      back:()=>this.back(), onNext:()=>this.goNext(),
+
+      // generating
+      genLabel:phaseDefs[gi].l, genTool:phaseDefs[gi].t, genBarsEl,
+
+      // plan
+      firmActivity:this.pretty(firm.predmet), firmForma:firm.forma, firmSidlo:firm.sidlo.adresa, firmObrat:this.money(firm.predpokladany_obrat_rok),
+      firmEmpl: firm.plan_zamestnancu>0 ? (" · "+firm.plan_zamestnancu+" zam.") : "",
+      kpis, timelineAxisEl,
+      baselineCount:this.BASELINE.length, baselineMissed:hidden.length,
+      baselineExtraText: baselineExtra.length>0 ? (" a navíc by chybně uvedl volnou živnost") : "",
+      audit, showAudit:st.showAudit, toggleAudit:()=>this.toggleAudit(),
+      auditLabel: st.showAudit ? "Skrýt zdroje a pravidla" : "Zobrazit zdroje a pravidla (audit "+ids.length+" povinností)",
+      auditChevron: st.showAudit ? "180deg" : "0deg",
+      iconShield:this.ic("shield-check"),
+      stepsSummary: stepsDone + "/" + stepsTotal + " kroků hotovo",
+      stepsColor: stepsDone>0 && stepsDone===stepsTotal ? "var(--green-700)" : "var(--text-subtle)",
+
+      // what-if
+      presets, freeText:st.freeText, setFree:(e)=>this.setFree(e), onFreeKey:(e)=>this.onFreeKey(e), runFree:()=>this.runFree(),
+      whatifOpen:st.whatifOpen, toggleWhatif:()=>this.toggleWhatif(), whatifChevron: st.whatifOpen ? "180deg" : "0deg",
+      chatOpen:st.chatOpen, chatClosed:!st.chatOpen, toggleChat:()=>this.toggleChat(),
+      thread, thinking:st.thinking, thinkingLabel:st.thinkingLabel,
+      clarifyDate:st.clarifyDate, onClarifyDate:(e)=>this.onClarifyDate(e)
+    });
+  }
+}
+</script>
+</body>
+</html>

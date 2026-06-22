@@ -1,0 +1,104 @@
+/* Year One — Color System
+ * ------------------------------------------------------------------
+ * Philosophy: cool-neutral slate carries the UI; a single confident
+ * cobalt/indigo "signal" blue is the only brand accent that touches
+ * interactive elements. A warm amber appears sparingly as "year one"
+ * dawn energy (highlights, illustration), never as a primary action.
+ * Restraint over decoration — color earns its place.
+ */
+:root {
+  /* ---- Neutral ink scale (cool slate) ---- */
+  --ink-900: #15171C; /* primary text, near-black */
+  --ink-800: #232730;
+  --ink-700: #353A45;
+  --ink-600: #4B515D;
+  --ink-500: #6A7180; /* muted / secondary text */
+  --ink-400: #969CA8; /* placeholder, disabled text */
+  --ink-300: #C4C9D1; /* borders (strong) */
+  --ink-200: #E4E7EC; /* borders (default), dividers */
+  --ink-150: #EDEFF3; /* hairline, subtle divider */
+  --ink-100: #F3F4F7; /* hover surface, track */
+  --ink-50:  #F8F9FB; /* tinted surface */
+
+  /* ---- Paper (backgrounds) ---- */
+  --paper:        #FAFAFB; /* app/page background */
+  --paper-raised: #FFFFFF; /* cards, sheets, popovers */
+  --paper-sunken: #F3F4F7; /* wells, code blocks, inset */
+
+  /* ---- Signal (brand cobalt/indigo) ---- */
+  --signal-50:  #F0F3FE;
+  --signal-100: #E2E8FD;
+  --signal-200: #C6D2FB;
+  --signal-300: #97A9F5;
+  --signal-400: #6379EE;
+  --signal-500: #3A56E8; /* PRIMARY action */
+  --signal-600: #2B43D6; /* hover */
+  --signal-700: #2235AE; /* active / pressed */
+  --signal-800: #1D2C84;
+
+  /* ---- Amber (warm highlight, "dawn") ---- */
+  --amber-50:  #FDF6EC;
+  --amber-100: #FAE9CF;
+  --amber-300: #F2C277;
+  --amber-400: #ECA94C;
+  --amber-500: #DD8E2E; /* warm accent, sparingly */
+  --amber-700: #A5641A;
+
+  /* ---- Semantic hues ---- */
+  --green-50:  #E9F7F0;
+  --green-100: #D2EFE1;
+  --green-500: #18996A; /* success */
+  --green-700: #0F6B4A;
+
+  --red-50:   #FCEDEC;
+  --red-100:  #F8DBD8;
+  --red-500:  #D6453E; /* danger / error */
+  --red-700:  #A22F2A;
+
+  /* ---------------------------------------------------------------- */
+  /* Semantic aliases — author UI against THESE, not raw scale values */
+  /* ---------------------------------------------------------------- */
+
+  /* Text */
+  --text-strong:   var(--ink-900);
+  --text-body:     var(--ink-800);
+  --text-muted:    var(--ink-500);
+  --text-subtle:   var(--ink-400);
+  --text-inverse:  #FFFFFF;
+  --text-link:     var(--signal-600);
+  --text-on-accent:#FFFFFF;
+
+  /* Surfaces */
+  --surface-page:    var(--paper);
+  --surface-card:    var(--paper-raised);
+  --surface-sunken:  var(--paper-sunken);
+  --surface-hover:   var(--ink-100);
+  --surface-active:  var(--ink-150);
+  --surface-inverse: var(--ink-900);
+
+  /* Borders */
+  --border-subtle:  var(--ink-150);
+  --border-default: var(--ink-200);
+  --border-strong:  var(--ink-300);
+  --border-focus:   var(--signal-500);
+
+  /* Accent / interactive */
+  --accent:         var(--signal-500);
+  --accent-hover:   var(--signal-600);
+  --accent-active:  var(--signal-700);
+  --accent-tint:    var(--signal-50);
+  --accent-tint-2:  var(--signal-100);
+
+  /* Status */
+  --status-success:      var(--green-500);
+  --status-success-tint: var(--green-50);
+  --status-danger:       var(--red-500);
+  --status-danger-tint:  var(--red-50);
+  --status-warning:      var(--amber-500);
+  --status-warning-tint: var(--amber-50);
+  --status-info:         var(--signal-500);
+  --status-info-tint:    var(--signal-50);
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px var(--signal-200);
+}

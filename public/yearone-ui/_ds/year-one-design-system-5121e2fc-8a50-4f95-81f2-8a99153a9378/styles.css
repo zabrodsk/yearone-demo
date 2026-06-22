@@ -1,0 +1,12 @@
+/* Year One — Design System · global stylesheet entry
+ * ------------------------------------------------------------------
+ * Consumers link THIS one file. It is an import manifest only — never
+ * add rules directly here. Everything reachable from these imports is
+ * shipped: tokens (CSS custom properties) and @font-face/webfont links.
+ */
+@import url('tokens/fonts.css');
+@import url('tokens/colors.css');
+@import url('tokens/typography.css');
+@import url('tokens/spacing.css');
+@import url('tokens/elevation.css');
+@import url('tokens/base.css');
