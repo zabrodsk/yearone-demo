@@ -297,11 +297,11 @@
           <div class="yoFade" style="position:absolute;left:12px;right:12px;bottom:calc(100% - 2px);background:var(--surface-card);border:1px solid var(--border-default);border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden;z-index:20;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-subtle);">
               <span style="font-size:10.5px;font-family:var(--font-mono);letter-spacing:.06em;color:var(--text-subtle);">CO MŮŽETE VYZKOUŠET</span>
-              <button onClick="{{ closeWhatif }}" style="width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--text-subtle);cursor:pointer;display:grid;place-items:center;font-size:13px;">{{ iconX }}</button>
+              <button id="yo-preset-close" onClick="{{ closeWhatif }}" style="width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--text-subtle);cursor:pointer;display:grid;place-items:center;font-size:13px;">{{ iconX }}</button>
             </div>
             <div class="yoScroll" style="max-height:264px;overflow-y:auto;">
               <sc-for list="{{ presets }}" as="p" hint-placeholder-count="6">
-                <button onClick="{{ p.onClick }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;padding:11px 14px;border:none;border-top:1px solid var(--border-subtle);background:transparent;cursor:pointer;font-family:var(--font-body);transition:background .14s;" style-hover="background:var(--surface-sunken);">
+                <button data-yo-preset-key="{{ p.key }}" onClick="{{ p.onClick }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;padding:11px 14px;border:none;border-top:1px solid var(--border-subtle);background:transparent;cursor:pointer;font-family:var(--font-body);transition:background .14s;" style-hover="background:var(--surface-sunken);">
                   <span style="display:flex;flex-direction:column;gap:2px;min-width:0;">
                     <strong style="font-size:13px;font-weight:600;color:var(--text-strong);line-height:1.3;">{{ p.title }}</strong>
                     <span style="font-size:11.5px;color:var(--text-muted);line-height:1.3;">{{ p.desc }}</span>
@@ -313,7 +313,7 @@
           </div>
         </sc-if>
         <div style="display:flex;align-items:flex-end;gap:8px;background:var(--surface-card);border:1px solid var(--border-strong);border-radius:11px;padding:7px 7px 7px 8px;">
-          <button onClick="{{ openWhatif }}" title="Otevřít presets" aria-label="Otevřít presets" style="width:36px;height:36px;flex:none;border-radius:9px;cursor:pointer;border:1px solid var(--accent);background:var(--accent-tint);color:var(--accent);display:grid;place-items:center;font-size:16px;transition:all .14s;" style-hover="background:var(--accent);color:#fff;">{{ iconGitBranch }}</button>
+          <button id="yo-preset-button" onClick="{{ openWhatif }}" title="Otevřít presets" aria-label="Otevřít presets" style="width:42px;height:42px;flex:none;border-radius:10px;cursor:pointer;border:1px solid var(--accent);background:var(--accent-tint);color:var(--accent);display:grid;place-items:center;font-size:18px;transition:all .14s;position:relative;z-index:3;" style-hover="background:var(--accent);color:#fff;">{{ iconGitBranch }}</button>
           <textarea id="yo-free-text" onInput="{{ setFree }}" onKeyDown="{{ onFreeKey }}" placeholder="Zeptejte se na vlastní scénář…" rows="1" style="flex:1;min-width:0;min-height:36px;font-family:var(--font-body);font-size:13.5px;color:var(--text-strong);background:transparent;border:none;outline:none;resize:none;line-height:1.5;padding:6px 0;max-height:90px;cursor:text;pointer-events:auto;"></textarea>
           <button onClick="{{ runFree }}" style="width:36px;height:36px;flex:none;border-radius:9px;border:none;cursor:pointer;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:16px;box-shadow:var(--shadow-xs);">{{ iconSend }}</button>
         </div>
@@ -478,7 +478,51 @@ class Component extends DCLogic {
 
   // ───────── helpers ─────────
   componentDidMount(){
+    this.installNativeControls();
     this.loadBackendDefaults();
+  }
+  componentDidUpdate(){
+    this.installNativeControls();
+  }
+  installNativeControls(){
+    if (this._nativeControlsInstalled) return;
+    this._nativeControlsInstalled = true;
+    this._nativeControlHandler = (event) => {
+      const now = Date.now();
+      if (event.type === "click" && this._nativeLastPointerAt && now - this._nativeLastPointerAt < 650) return;
+      if (event.type === "pointerdown") this._nativeLastPointerAt = now;
+
+      const target = event.target;
+      if (!target || !target.closest) return;
+
+      const openButton = target.closest("#yo-preset-button");
+      if (openButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.openWhatif();
+        return;
+      }
+
+      const closeButton = target.closest("#yo-preset-close");
+      if (closeButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.closeWhatif();
+        return;
+      }
+
+      const presetButton = target.closest("[data-yo-preset-key]");
+      if (presetButton) {
+        const key = presetButton.getAttribute("data-yo-preset-key");
+        if (key) {
+          event.preventDefault();
+          event.stopPropagation();
+          this.preset(key);
+        }
+      }
+    };
+    document.addEventListener("pointerdown", this._nativeControlHandler, true);
+    document.addEventListener("click", this._nativeControlHandler, true);
   }
   async apiJson(url, options){
     const res = await fetch(url, Object.assign({
@@ -802,7 +846,7 @@ class Component extends DCLogic {
     const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const firmId = this.state.selectedFirmId || "FIRMA-0004";
     const analysisPromise = this.fetchAnalysis(firmId).catch(() => null);
-    const finish = () => analysisPromise.finally(() => this.setState({screen:"plan"}));
+    const finish = () => analysisPromise.finally(() => this.setState({screen:"plan", whatifOpen:true}));
     if (reduced){ finish(); return; }
     let i = 0;
     const tick = () => {
@@ -813,7 +857,13 @@ class Component extends DCLogic {
     this._t = setTimeout(tick, speed);
   }
   _clear(){ if (this._t){ clearTimeout(this._t); this._t = null; } if (this._ct){ clearTimeout(this._ct); this._ct = null; } }
-  componentWillUnmount(){ this._clear(); }
+  componentWillUnmount(){
+    this._clear();
+    if (this._nativeControlHandler) {
+      document.removeEventListener("pointerdown", this._nativeControlHandler, true);
+      document.removeEventListener("click", this._nativeControlHandler, true);
+    }
+  }
   toggleStep(key){ const d = Object.assign({}, this.state.doneSteps || {}); d[key] = !d[key]; this.setState({doneSteps:d}); }
   toggleAudit(){ this.setState({showAudit:!this.state.showAudit}); }
   openWhatif(){ this.setState({whatifOpen:true}); }
