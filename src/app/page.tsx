@@ -11,7 +11,7 @@ export default function Home() {
     >
       <iframe
         title="YearOne dashboard"
-        src="/yearone-ui/YearOne%20Agent.dc.html"
+        src="/yearone-ui/YearOne%20Agent.dc.html?v=presets-dom-20260622"
         style={{
           display: "block",
           width: "100%",
