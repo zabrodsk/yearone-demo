@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { parseScenarioText, simulateEventWithModel } from "@/lib/agent";
+import { toErrorResponse } from "@/lib/api-errors";
 
 const schema = z.object({
   firmId: z.string().min(1),
@@ -26,7 +27,24 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const body = schema.parse(await request.json());
+  let raw: unknown;
+  try {
+    raw = await request.json();
+  } catch {
+    return NextResponse.json({ message: "Neplatné JSON tělo požadavku." }, { status: 400 });
+  }
+
+  const parsed = schema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ message: "Neplatný vstup.", issues: parsed.error.issues }, { status: 400 });
+  }
+
+  const body = parsed.data;
   const event = body.event ?? parseScenarioText(body.text ?? "");
-  return NextResponse.json(await simulateEventWithModel(body.firmId, event));
+
+  try {
+    return NextResponse.json(await simulateEventWithModel(body.firmId, event));
+  } catch (error) {
+    return toErrorResponse(error);
+  }
 }

@@ -132,13 +132,6 @@ function applyScenario(firm: FirmIntent, scenario?: ScenarioEvent): FirmIntent {
     };
   }
 
-  if (scenario.type === "employee_start" && firm.plan_zamestnancu === 0) {
-    return {
-      ...firm,
-      plan_zamestnancu: 1
-    };
-  }
-
   if (scenario.type === "employee_start") {
     return {
       ...firm,

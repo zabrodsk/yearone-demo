@@ -18,6 +18,10 @@ build/
 .a5c/
 .omc/
 
+# generated design research/reference exports
+design-extract-output/
+src/app/design/
+
 # caches
 *.tsbuildinfo
 __pycache__/

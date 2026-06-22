@@ -1,5 +1,6 @@
 import type { FirmIntent, ObligationCard, ObligationId, ObligationState, TimelineItem, TradeType } from "./types";
 import { allValidObligationIds, getObligationCatalog, lookupLegislation, lookupRegistry } from "./sandbox";
+import { InvalidInputError } from "./errors";
 
 export const DPH_THRESHOLD_CZK = 2_000_000;
 
@@ -59,7 +60,7 @@ export function evaluateRules(firm: FirmIntent): RuleEvaluation {
 
   const tradeResult = lookupRegistry("zivnost", firm.predmet);
   if (!tradeResult) {
-    throw new Error(`Missing trade classification for: ${firm.predmet}`);
+    throw new InvalidInputError(`Missing trade classification for: ${firm.predmet}`);
   }
 
   ids.add(tradeMap[tradeResult.typ_zivnosti]);
@@ -110,7 +111,7 @@ export function validateObligationIds(ids: ObligationId[]): void {
   const valid = allValidObligationIds();
   const invalid = ids.filter((id) => !valid.has(id));
   if (invalid.length > 0) {
-    throw new Error(`Invalid obligation id(s): ${invalid.join(", ")}`);
+    throw new InvalidInputError(`Invalid obligation id(s): ${invalid.join(", ")}`);
   }
 }
 

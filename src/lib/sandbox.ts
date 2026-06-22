@@ -1,48 +1,52 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { AresRecord, FirmIntent, ObligationId, PublicCase, TradeType } from "./types";
+import { NotFoundError } from "./errors";
+import firmsData from "../../data/sandbox/zamery_firem.json";
+import obligationCatalogData from "../../data/sandbox/katalog_povinnosti.json";
+import tradeClassificationsData from "../../data/sandbox/klasifikace_zivnosti.json";
+import publicCasesData from "../../data/sandbox/ukazkove_pripady.json";
+import aresData from "../../data/sandbox/registr_ares.json";
 
-const dataDir = path.join(process.cwd(), "data", "sandbox");
-
-function readJson<T>(name: string): T {
-  const filePath = path.join(dataDir, name);
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
-}
+// Static sandbox data is imported (bundled into the build graph) and parsed
+// once at module load, instead of re-reading from disk on every call.
+const firms = firmsData as unknown as FirmIntent[];
+const obligationCatalog = obligationCatalogData as unknown as Record<ObligationId, string>;
+const tradeClassifications = tradeClassificationsData as unknown as Record<string, TradeType>;
+const publicCases = publicCasesData as unknown as PublicCase[];
+const aresRecords = aresData as unknown as Record<string, AresRecord>;
 
 export function getAllFirms(): FirmIntent[] {
-  return readJson<FirmIntent[]>("zamery_firem.json");
+  return firms;
 }
 
 export function getIntent(firmId: string): FirmIntent {
-  const firm = getAllFirms().find((item) => item.id === firmId);
+  const firm = firms.find((item) => item.id === firmId);
   if (!firm) {
-    throw new Error(`Unknown firm id: ${firmId}`);
+    throw new NotFoundError(`Unknown firm id: ${firmId}`);
   }
   return firm;
 }
 
 export function getObligationCatalog(): Record<ObligationId, string> {
-  return readJson<Record<ObligationId, string>>("katalog_povinnosti.json");
+  return obligationCatalog;
 }
 
 export function getTradeClassifications(): Record<string, TradeType> {
-  return readJson<Record<string, TradeType>>("klasifikace_zivnosti.json");
+  return tradeClassifications;
 }
 
 export function getPublicCases(): PublicCase[] {
-  return readJson<PublicCase[]>("ukazkove_pripady.json");
+  return publicCases;
 }
 
 export function lookupRegistry(type: "zivnost", key: string): { predmet: string; typ_zivnosti: TradeType } | null;
 export function lookupRegistry(type: "ares", key: string): AresRecord | null;
 export function lookupRegistry(type: "zivnost" | "ares", key: string) {
   if (type === "zivnost") {
-    const tradeType = getTradeClassifications()[key];
+    const tradeType = tradeClassifications[key];
     return tradeType ? { predmet: key, typ_zivnosti: tradeType } : null;
   }
 
-  const records = readJson<Record<string, AresRecord>>("registr_ares.json");
-  return records[String(key)] ?? null;
+  return aresRecords[String(key)] ?? null;
 }
 
 export function lookupLegislation(topic: string) {
@@ -61,5 +65,5 @@ export function lookupLegislation(topic: string) {
 }
 
 export function allValidObligationIds(): Set<ObligationId> {
-  return new Set(Object.keys(getObligationCatalog()) as ObligationId[]);
+  return new Set(Object.keys(obligationCatalog) as ObligationId[]);
 }
